@@ -1,171 +1,168 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>生日小驚喜 Part 2</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>生日小驚喜 Part 2</title>
 
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@700&display=swap" rel="stylesheet">
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@700&display=swap" rel="stylesheet">
 
-  <style>
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: linear-gradient(to right, #d8b4fe, #fbc2eb); /* 粉紫漸層 */
-      font-family: 'Noto Sans TC', sans-serif;
-      overflow: hidden;
-      position: relative;
-    }
+<style>
+  :root{
+    --fg:#4b0082;
+    --bgA:#d8b4fe;
+    --bgB:#fbc2eb;
+  }
 
-    /* 文字動畫 */
-    .text {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(0.5);
-      font-size: 3em;
-      font-weight: bold;
-      color: #4b0082;
-      opacity: 0;
-      text-align: center;
-      max-width: 90%;
-      word-wrap: break-word;
-      animation: zoomIn 1s forwards;
-    }
+  html,body{height:100%;margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background: linear-gradient(to right, var(--bgA), var(--bgB));
+    font-family: 'Noto Sans TC', sans-serif;
+    overflow:hidden;
+    color:var(--fg);
+    position:relative;
+  }
 
-    /* 倒數數字更大，並且會淡出 */
-    .big {
-      font-size: 5em;
-      animation: zoomInFade 2s forwards;
-    }
+  /* 每段 message 都是一張 full-screen slide */
+  .slide{
+    position:fixed;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    pointer-events:none;
+  }
 
-    @keyframes zoomIn {
-      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
-      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
-      100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-    }
+  .message{
+    text-align:center;
+    max-width:90%;
+    padding:0 12px;
+    color:var(--fg);
+    font-weight:700;
+    opacity:0;
+    transform:scale(.6);
+    font-size: clamp(28px, 7.5vw, 72px);
+    transition: transform .55s cubic-bezier(.2,.8,.2,1), opacity .45s;
+    white-space: nowrap; /* 🔹強制不換行 */
+    overflow:hidden;
+  }
 
-    @keyframes zoomInFade {
-      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
-      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
-      80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-      100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
-    }
+  .message.number{
+    font-size: clamp(64px, 28vw, 220px);
+    animation: numberZoomFade 2s forwards;
+  }
 
-    /* 彩屑樣式 */
-    .confetti {
-      position: absolute;
-      border-radius: 2px;
-      opacity: 0.8;
-      top: -10px;
-      animation: fall linear forwards;
-    }
+  @keyframes numberZoomFade{
+    0%   { opacity:0; transform: scale(0.5); }
+    25%  { opacity:1; transform: scale(1.25); }
+    55%  { opacity:1; transform: scale(1); }
+    90%  { opacity:1; transform: scale(1); }
+    100% { opacity:0; transform: scale(1); }
+  }
 
-    @keyframes fall {
-      to {
-        transform: translateY(100vh) rotate(720deg) translateX(var(--drift, 0px));
-      }
-    }
+  .message.in{
+    opacity:1;
+    transform: scale(1);
+  }
 
-    /* 手機小螢幕調整字體大小 */
-    @media (max-width: 480px) {
-      .text { font-size: 2em; }
-      .big { font-size: 3.5em; }
-    }
-  </style>
+  .confetti{
+    position: fixed;
+    top: -18px;
+    width:10px; height:10px;
+    border-radius:3px;
+    opacity:0.95;
+    z-index: 5;
+    pointer-events:none;
+    will-change: transform;
+    animation: confettiFall linear forwards;
+  }
+
+  @keyframes confettiFall{
+    to { transform: translateY(110vh) translateX(var(--drift,0px)) rotate(720deg); }
+  }
+
+  @media (max-width:420px){
+    .message{ font-size: clamp(20px, 8.5vw, 40px); }
+    .message.number{ font-size: clamp(48px, 30vw, 160px); }
+  }
+</style>
 </head>
 <body>
 
-  <!-- 顯示文字 -->
-  <div id="text-container"></div>
+<audio id="bgm" autoplay loop>
+  <source src="Blessing.mp3" type="audio/mpeg">
+</audio>
 
-  <!-- 背景音樂 -->
-  <audio id="bg-music" loop>
-    <source src="Blessing.mp3" type="audio/mp3">
-  </audio>
+<script>
+const bgm = document.getElementById('bgm');
+const wantA = localStorage.getItem('bgmAllowed') === 'true';
+const wantB = localStorage.getItem('bgmPlaying') === 'true';
+if (wantA || wantB) {
+  bgm.play().catch(()=>{ console.log('bgm.play() 被阻擋'); });
+}
 
-  <script>
-    // 確保音樂自動播放（依靠第一頁的觸發）
-    const bgm = document.getElementById("bg-music");
-    if (localStorage.getItem("bgmPlaying") === "true") {
-      bgm.play().catch(() => {
-        console.log("需要互動才能播放音樂");
-      });
-    }
+const messages = [
+  "嘿～芝茉妲絲",
+  "今天是屬於",
+  "🫵🏻🫵🏻你🫵🏻🫵🏻",
+  "特別日子！！！",
+  "準備好了嗎？🧐",
+  "就算還沒👀",
+  "也給我準備好😎",
+  "不等你的🥳",
+  "5","4","3","2","1"
+];
 
-    // 文字內容
-    const messages = [
-      "嘿～芝茉妲絲",
-      "今天是屬於",
-      "🫵🏻🫵🏻你🫵🏻🫵🏻",
-      "特別日子！！！",
-      "準備好了嗎？🧐",
-      "就算還沒👀",
-      "也給我準備好😎",
-      "不等你的🥳",
-      "5", "4", "3", "2", "1"
-    ];
+let idx = 0;
+const DURATION_NORMAL = 1800;
+const DURATION_NUMBER = 2000;
 
-    let index = 0;
-    const container = document.getElementById("text-container");
+function showNext(){
+  if (idx >= messages.length) return;
+  const txt = messages[idx];
+  const isNumber = !isNaN(txt);
 
-    function showNextMessage() {
-      if (index < messages.length) {
-        const text = document.createElement("div");
-        text.className = "text";
-        if (!isNaN(messages[index])) {
-          text.classList.add("big"); // 倒數字比較大且會淡出
-        }
-        text.textContent = messages[index];
-        container.appendChild(text);
+  const slide = document.createElement('div');
+  slide.className = 'slide';
 
-        // 每段顯示完畢後換下一段
-        setTimeout(() => {
-          text.remove();
-          index++;
-          showNextMessage();
-        }, 2000);
-      }
-    }
+  const msg = document.createElement('div');
+  msg.className = 'message' + (isNumber ? ' number' : '');
+  msg.textContent = txt;
 
-    showNextMessage();
+  slide.appendChild(msg);
+  document.body.appendChild(slide);
 
-    // 彩屑效果
-    function createConfetti() {
-      const confetti = document.createElement("div");
-      confetti.classList.add("confetti");
+  requestAnimationFrame(()=> msg.classList.add('in'));
 
-      // 彩虹顏色
-      const colors = ["#ff0", "#0f0", "#0ff", "#f0f", "#f00", "#00f"];
-      confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+  const dur = isNumber ? DURATION_NUMBER : DURATION_NORMAL;
+  setTimeout(()=> {
+    slide.remove();
+    idx++;
+    showNext();
+  }, dur);
+}
+showNext();
 
-      // 隨機位置
-      confetti.style.left = Math.random() * window.innerWidth + "px";
+function createConfetti(){
+  const c = document.createElement('div');
+  c.className = 'confetti';
+  const colors = ["#ffd500","#ff69b4","#00bfff","#7cfc00","#ff4500","#ffffff"];
+  c.style.background = colors[Math.floor(Math.random()*colors.length)];
+  c.style.left = Math.random() * window.innerWidth + 'px';
+  const size = Math.random() * 14 + 6;
+  c.style.width = size + 'px';
+  c.style.height = size + 'px';
+  const drift = (Math.random()*260 - 130) + 'px';
+  c.style.setProperty('--drift', drift);
+  const duration = Math.random()*3 + 2;
+  c.style.animationDuration = duration + 's';
 
-      // 隨機大小（5px ~ 20px）
-      const size = Math.random() * 15 + 5;
-      confetti.style.width = size + "px";
-      confetti.style.height = size + "px";
-
-      // 隨機動畫時間（2s ~ 5s）
-      const duration = Math.random() * 3 + 2;
-      confetti.style.animationDuration = duration + "s";
-
-      // 加入隨機左右飄移
-      confetti.style.setProperty("--drift", (Math.random() * 40 - 20) + "px");
-
-      document.body.appendChild(confetti);
-
-      // 動畫結束後刪除
-      setTimeout(() => {
-        confetti.remove();
-      }, duration * 1000);
-    }
-
-    // 不斷生成紙屑
-    setInterval(createConfetti, 120);
-  </script>
-
+  document.body.appendChild(c);
+  setTimeout(()=> c.remove(), duration*1000 + 200);
+}
+setInterval(createConfetti, 120);
+</script>
 </body>
 </html>
