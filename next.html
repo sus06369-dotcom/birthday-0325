@@ -11,11 +11,8 @@
   <style>
     body {
       margin: 0;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: linear-gradient(to right, #d8b4fe, #fbc2eb);
+      min-height: 100vh;
+      background: linear-gradient(to right, #d8b4fe, #fbc2eb); /* 粉紫漸層 */
       font-family: 'Noto Sans TC', sans-serif;
       overflow: hidden;
       position: relative;
@@ -24,34 +21,36 @@
     /* 文字動畫 */
     .text {
       position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.5);
       font-size: 3em;
       font-weight: bold;
       color: #4b0082;
       opacity: 0;
-      transform: scale(0.5);
       text-align: center;
-      width: 100%;
-      animation: zoomIn 2s forwards;
+      max-width: 90%;
+      word-wrap: break-word;
+      animation: zoomIn 1s forwards;
     }
 
-    /* 倒數數字更大 + 淡出 */
+    /* 倒數數字更大，並且會淡出 */
     .big {
-      font-size: 6em;
-      animation: zoomInOut 2s forwards;
+      font-size: 5em;
+      animation: zoomInFade 2s forwards;
     }
 
     @keyframes zoomIn {
-      0% { opacity: 0; transform: scale(0.5); }
-      50% { opacity: 1; transform: scale(1.2); }
-      100% { opacity: 1; transform: scale(1); }
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+      100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
     }
 
-    @keyframes zoomInOut {
-      0% { opacity: 0; transform: scale(0.5); }
-      20% { opacity: 1; transform: scale(1.2); }
-      50% { opacity: 1; transform: scale(1); }
-      80% { opacity: 1; }
-      100% { opacity: 0; }
+    @keyframes zoomInFade {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+      80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
     }
 
     /* 彩屑樣式 */
@@ -65,8 +64,14 @@
 
     @keyframes fall {
       to {
-        transform: translateY(100vh) rotate(720deg);
+        transform: translateY(100vh) rotate(720deg) translateX(var(--drift, 0px));
       }
+    }
+
+    /* 手機小螢幕調整字體大小 */
+    @media (max-width: 480px) {
+      .text { font-size: 2em; }
+      .big { font-size: 3.5em; }
     }
   </style>
 </head>
@@ -81,9 +86,9 @@
   </audio>
 
   <script>
-    // 音樂播放（依靠第一頁的觸發）
+    // 確保音樂自動播放（依靠第一頁的觸發）
     const bgm = document.getElementById("bg-music");
-    if (localStorage.getItem("bgmAllowed") === "true") {
+    if (localStorage.getItem("bgmPlaying") === "true") {
       bgm.play().catch(() => {
         console.log("需要互動才能播放音樂");
       });
@@ -110,16 +115,17 @@
         const text = document.createElement("div");
         text.className = "text";
         if (!isNaN(messages[index])) {
-          text.classList.add("big"); // 倒數數字比較大
+          text.classList.add("big"); // 倒數字比較大且會淡出
         }
         text.textContent = messages[index];
         container.appendChild(text);
 
+        // 每段顯示完畢後換下一段
         setTimeout(() => {
           text.remove();
           index++;
           showNextMessage();
-        }, 2000); // 每段 2 秒
+        }, 2000);
       }
     }
 
@@ -130,24 +136,34 @@
       const confetti = document.createElement("div");
       confetti.classList.add("confetti");
 
+      // 彩虹顏色
       const colors = ["#ff0", "#0f0", "#0ff", "#f0f", "#f00", "#00f"];
       confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
 
+      // 隨機位置
       confetti.style.left = Math.random() * window.innerWidth + "px";
+
+      // 隨機大小（5px ~ 20px）
       const size = Math.random() * 15 + 5;
       confetti.style.width = size + "px";
       confetti.style.height = size + "px";
 
+      // 隨機動畫時間（2s ~ 5s）
       const duration = Math.random() * 3 + 2;
       confetti.style.animationDuration = duration + "s";
 
+      // 加入隨機左右飄移
+      confetti.style.setProperty("--drift", (Math.random() * 40 - 20) + "px");
+
       document.body.appendChild(confetti);
 
+      // 動畫結束後刪除
       setTimeout(() => {
         confetti.remove();
       }, duration * 1000);
     }
 
+    // 不斷生成紙屑
     setInterval(createConfetti, 120);
   </script>
 
