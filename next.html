@@ -1,75 +1,77 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>生日驚喜</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>生日驚喜 - 第二頁</title>
+
+  <!-- 可愛字型（雲端載入，對方也能看到） -->
+  <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet"/>
+
   <style>
-    body {
+    html, body {
       margin: 0;
-      background: linear-gradient(to right, #fbc2eb, #d8b4fe);
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      height: 100%;
       overflow: hidden;
-      font-family: "Noto Sans TC", sans-serif;
+      background: linear-gradient(to right, #fbc2eb, #d8b4fe); /* 粉紫漸層 */
+      font-family: 'ZCOOL KuaiLe', 'Noto Sans TC', sans-serif;
       color: #4b0082;
     }
 
-    .container {
-      position: relative;
+    /* 三層：背景碎花 → 文字 → 粒子 */
+    #bg, #fx {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    #stage {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       text-align: center;
-      z-index: 2;
+      z-index: 1;
+      padding: 2rem;
     }
 
-    .text {
-      font-size: 2.5em;
+    #text {
+      font-size: min(12vw, 64px);
+      line-height: 1.08;
+      transform: scale(0.6);
       opacity: 0;
-      transform: scale(0.5);
-      animation: popIn 1s forwards;
+      transition: transform 420ms ease, opacity 420ms ease;
+      will-change: transform, opacity;
+      text-shadow: 0 2px 0 rgba(255,255,255,0.35);
+      user-select: none;
     }
+    #text.show { transform: scale(1.06); opacity: 1; }
 
-    @keyframes popIn {
-      0% { opacity: 0; transform: scale(0.5); }
-      50% { opacity: 1; transform: scale(1.2); }
-      100% { opacity: 1; transform: scale(1); }
-    }
-
-    .explode {
-      animation: explode 1s forwards;
-    }
-
-    @keyframes explode {
-      0% { opacity: 1; transform: scale(1); }
-      100% { opacity: 0; transform: scale(3); filter: blur(4px); }
-    }
-
-    /* confetti */
-    .confetti {
-      position: absolute;
-      width: 8px;
-      height: 14px;
-      background-color: red;
-      top: -20px;
-      animation: fall linear forwards;
-      opacity: 0.8;
-    }
-
-    @keyframes fall {
-      to {
-        transform: translateY(110vh) rotateZ(360deg);
-        opacity: 1;
-      }
-    }
+    /* 小螢幕微調行高 */
+    @media (max-width: 360px) { #text { line-height: 1.0; } }
   </style>
 </head>
 <body>
-  <div class="container" id="textContainer"></div>
+  <!-- 背景碎花（持續飄） -->
+  <canvas id="bg"></canvas>
+  <!-- 置中文字 -->
+  <div id="stage"><div id="text"></div></div>
+  <!-- 文字粒子爆炸 -->
+  <canvas id="fx"></canvas>
+
+  <!-- 背景音樂：把檔名換成你上傳的檔案（例如 happy.mp3） -->
+  <audio id="bgm" autoplay loop>
+    <source src="music.mp3" type="audio/mpeg">
+  </audio>
 
   <script>
+    /*********** 文字順序 ***********/
     const messages = [
-      "5", "4", "3", "2", "1",
+      "5","4","3","2","1",
       "嘿～芝茉妲絲",
       "今天是屬於",
       "🫵🏻🫵🏻你🫵🏻🫵🏻",
@@ -80,42 +82,182 @@
       "不等你的🥳"
     ];
 
-    const container = document.getElementById("textContainer");
-
-    let i = 0;
-    function showMessage() {
-      if (i >= messages.length) return;
-      const p = document.createElement("p");
-      p.className = "text";
-      p.textContent = messages[i];
-      container.appendChild(p);
-
-      // 先顯示文字
-      setTimeout(() => {
-        p.classList.add("explode");
-      }, 1000); // 1秒後爆炸消失
-
-      i++;
-      setTimeout(showMessage, 2000); // 2秒後顯示下一個
+    /*********** 小工具 ***********/
+    const delay = ms => new Promise(r => setTimeout(r, ms));
+    async function ensureFonts() {
+      if (document.fonts && document.fonts.ready) {
+        try { await document.fonts.ready; } catch(e){}
+      }
     }
 
-    showMessage();
-
-    // confetti
-    function createConfetti() {
-      const confetti = document.createElement("div");
-      confetti.className = "confetti";
-      document.body.appendChild(confetti);
-
-      const colors = ["#ff0", "#0ff", "#f0f", "#0f0", "#f00", "#00f"];
-      confetti.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
-      confetti.style.left = Math.random() * 100 + "vw";
-      confetti.style.animationDuration = (3 + Math.random() * 2) + "s";
-
-      setTimeout(() => confetti.remove(), 5000);
+    function fitCanvas(canvas) {
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
+      const w = window.innerWidth, h = window.innerHeight;
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+      canvas.style.width = w + 'px';
+      canvas.style.height = h + 'px';
+      const ctx = canvas.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      return ctx;
     }
 
-    setInterval(createConfetti, 200);
+    /*********** 背景碎花 ***********/
+    const bg = document.getElementById('bg');
+    const bgCtx = fitCanvas(bg);
+    let flakes = [];
+    function initFlakes(n = 130) {
+      flakes = Array.from({length:n}, () => ({
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        r: Math.random()*5 + 3,
+        vx: (Math.random()-0.5)*0.6,
+        vy: Math.random()*1.2 + 0.7,
+        rot: Math.random()*Math.PI*2,
+        vr: (Math.random()-0.5)*0.08,
+        color: hsl(${Math.random()*360}, 95%, 60%)
+      }));
+    }
+    function drawFlakes() {
+      bgCtx.clearRect(0,0,window.innerWidth, window.innerHeight);
+      for (const f of flakes) {
+        bgCtx.save();
+        bgCtx.translate(f.x, f.y);
+        bgCtx.rotate(f.rot);
+        bgCtx.fillStyle = f.color;
+        const s=f.r;
+        bgCtx.beginPath();
+        bgCtx.moveTo(0,-s); bgCtx.lineTo(s,0); bgCtx.lineTo(0,s); bgCtx.lineTo(-s,0);
+        bgCtx.closePath(); bgCtx.fill();
+        bgCtx.restore();
+
+        f.x += f.vx; f.y += f.vy; f.rot += f.vr;
+        if (f.y - f.r > window.innerHeight) { f.y = -10; f.x = Math.random()*window.innerWidth; }
+        if (f.x < -20) f.x = window.innerWidth + 20;
+        if (f.x > window.innerWidth + 20) f.x = -20;
+      }
+      requestAnimationFrame(drawFlakes);
+    }
+
+    /*********** 粒子爆炸（從文字輪廓炸開） ***********/
+    const fx = document.getElementById('fx');
+    const fxCtx = fitCanvas(fx);
+    let particles = [];
+
+    function explodeTextToParticles(text) {
+      // 先把文字畫到離屏 canvas
+      const off = document.createElement('canvas');
+      const offCtx = off.getContext('2d');
+      const W = window.innerWidth, H = window.innerHeight;
+      off.width = W; off.height = H;
+
+      // 自適應字體大小：短字大、長字小
+      const minSide = Math.min(W, H);
+      const base = Math.min(0.22 * minSide, 120);
+      const len = Math.max(2, text.length);
+      const fontSize = (len <= 2 ? base*1.25 : base * (8/Math.max(6,len)));
+      offCtx.fillStyle = '#222';
+      offCtx.textAlign = 'center';
+      offCtx.textBaseline = 'middle';
+      offCtx.font = `700 ${fontSize}px 'ZCOOL KuaiLe','Noto Sans TC',sans-serif`;
+      offCtx.fillText(text, W/2, H/2);
+
+      // 抽樣像素（步距小=更密，數字可調）
+      const img = offCtx.getImageData(0,0,W,H).data;
+      const step = Math.max(3, Math.floor(fontSize/14)); // 3 更密、5 更省效能
+      const cx = W/2, cy = H/2;
+
+      for (let y = 0; y < H; y += step) {
+        for (let x = 0; x < W; x += step) {
+          const a = img[(y*W + x)*4 + 3];
+          if (a > 80 && Math.random() < 0.95) {
+            const ang = Math.atan2(y - cy, x - cx) + (Math.random()-0.5)*0.7;
+            const spd = 2.2 + Math.random()*3.6; // 速度更有爆炸感
+            particles.push({
+              x, y,
+              vx: Math.cos(ang)*spd,
+              vy: Math.sin(ang)*spd,
+              life: 70 + Math.random()*45,
+              size: Math.random()*2 + 1.4,
+              color: hsl(${Math.random()*360}, 95%, 60%)
+            });
+          }
+        }
+      }
+    }
+
+    function animateParticles() {
+      fxCtx.clearRect(0,0, window.innerWidth, window.innerHeight);
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx; p.y += p.vy;
+        p.vy += 0.06;     // 重力
+        p.vx *= 0.99;     // 阻力
+        p.vy *= 0.99;
+        p.life--;
+
+        fxCtx.globalAlpha = Math.max(0, p.life/100);
+        fxCtx.fillStyle = p.color;
+        fxCtx.beginPath();
+        fxCtx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+        fxCtx.fill();
+        fxCtx.globalAlpha = 1;
+
+        if (p.life <= 0) particles.splice(i, 1);
+      }
+      requestAnimationFrame(animateParticles);
+    }
+
+    /*********** 逐段顯示的主流程（等字型→顯示→爆炸） ***********/
+    const textEl = document.getElementById('text');
+    async function runSequence() {
+      await ensureFonts(); // 先等字型載入，避免爆錯位
+      for (let i = 0; i < messages.length; i++) {
+        const msg = messages[i];
+
+        textEl.textContent = msg;
+        textEl.classList.remove('show');
+        await new Promise(r => requestAnimationFrame(r)); // 讓瀏覽器先佈局
+        textEl.classList.add('show');
+
+        explodeTextToParticles(msg);   // 同步觸發粒子爆炸
+        await delay(1200);             // 節奏（可改 1000~1600）
+        textEl.classList.remove('show');
+        await delay(160);
+      }
+      // 全部跑完 → 白光一下 → 跳第三頁
+      flashAndGo();
+    }
+
+    function flashAndGo() {
+      const flash = document.createElement('div');
+      Object.assign(flash.style, {
+        position:'fixed', inset:0, background:'white', opacity:0, zIndex:9999,
+        transition:'opacity 220ms ease'
+      });
+      document.body.appendChild(flash);
+      requestAnimationFrame(()=> flash.style.opacity = 1);
+      setTimeout(()=> window.location.href = 'third.html', 260);
+    }
+
+    /*********** 音樂啟動（iOS 可能需要觸控） ***********/
+    (function ensureBgm(){
+      const a = document.getElementById('bgm');
+      const tryPlay = () => a.play().catch(()=>{});
+      document.addEventListener('click', tryPlay, { once:true });
+      document.addEventListener('touchstart', tryPlay, { once:true });
+      tryPlay();
+    })();
+
+    /*********** 啟動、尺寸 ***********/
+    function resizeAll() { fitCanvas(bg); fitCanvas(fx); }
+    window.addEventListener('resize', ()=>{ resizeAll(); initFlakes(flakes.length); });
+
+    // 初始
+    initFlakes(140);
+    drawFlakes();
+    animateParticles();
+    runSequence();
   </script>
 </body>
 </html>
