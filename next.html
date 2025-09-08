@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>生日驚喜</title>
+  <title>生日小驚喜 Part 2</title>
 
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@700&display=swap" rel="stylesheet">
@@ -15,62 +15,64 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background: linear-gradient(to right, #fbc2eb, #d8b4fe);
-      font-family: "Noto Sans TC", sans-serif;
+      background: linear-gradient(to right, #d8b4fe, #fbc2eb);
+      font-family: 'Noto Sans TC', sans-serif;
       overflow: hidden;
+      position: relative;
     }
 
-    /* 彩屑背景 */
-    canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 0;
-    }
-
+    /* 文字動畫 */
     .text {
-      position: absolute;
-      font-size: 2.5em;
+      font-size: 3em;
       font-weight: bold;
       color: #4b0082;
       opacity: 0;
       transform: scale(0.5);
-      animation: zoomIn 1s forwards;
-      z-index: 1;
+      animation: showText 1s forwards;
     }
 
+    /* 倒數字要更大 */
     .big {
       font-size: 5em;
-      color: #5a189a;
     }
 
-    @keyframes zoomIn {
+    @keyframes showText {
       to {
         opacity: 1;
         transform: scale(1);
+      }
+    }
+
+    /* 紙屑樣式 */
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background-color: red;
+      opacity: 0.7;
+      top: -10px;
+      animation: fall linear forwards;
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(100vh) rotate(720deg);
       }
     }
   </style>
 </head>
 <body>
 
-  <!-- 背景彩屑 -->
-  <canvas id="confetti"></canvas>
+  <!-- 顯示文字 -->
+  <div id="text-container"></div>
 
   <!-- 背景音樂 -->
-  <audio autoplay>
-    <source src="Blessing.mp3" type="audio/mpeg">
-    瀏覽器不支援音樂播放
+  <audio id="Blessing.mp3" autoplay loop>
+    <source src="your-music.mp3" type="audio/mp3">
   </audio>
 
-  <!-- 文字容器 -->
-  <div id="container"></div>
-
   <script>
-    // 依序要顯示的文字
+    // 文字內容
     const messages = [
       "嘿～芝茉妲絲",
       "今天是屬於",
@@ -80,60 +82,61 @@
       "就算還沒👀",
       "也給我準備好😎",
       "不等你的🥳",
-      "5","4","3","2","1"
+      "5", "4", "3", "2", "1"
     ];
 
-    const container = document.getElementById("container");
+    let index = 0;
+    const container = document.getElementById("text-container");
 
-    let delay = 0;
-    messages.forEach((msg, i) => {
-      const div = document.createElement("div");
-      div.className = "text";
-      if (!isNaN(msg)) div.classList.add("big"); // 數字變大
-      div.style.animationDelay = `${delay}s`;
-      div.innerText = msg;
-      container.appendChild(div);
-      delay += 2; // 每個文字間隔 2 秒
-    });
-
-    // 彩屑動畫
-    const confetti = document.getElementById("confetti");
-    const ctx = confetti.getContext("2d");
-    confetti.width = window.innerWidth;
-    confetti.height = window.innerHeight;
-
-    const pieces = [];
-    const colors = ["#ffadad","#ffd6a5","#fdffb6","#caffbf","#9bf6ff","#a0c4ff","#bdb2ff","#ffc6ff"];
-
-    function ConfettiPiece() {
-      this.x = Math.random() * confetti.width;
-      this.y = Math.random() * confetti.height - confetti.height;
-      this.size = Math.random() * 8 + 4;
-      this.color = colors[Math.floor(Math.random() * colors.length)];
-      this.speed = Math.random() * 3 + 2;
-      this.angle = Math.random() * 360;
-    }
-
-    function createConfetti() {
-      pieces.push(new ConfettiPiece());
-    }
-
-    function updateConfetti() {
-      ctx.clearRect(0, 0, confetti.width, confetti.height);
-      pieces.forEach((p, i) => {
-        p.y += p.speed;
-        if (p.y > confetti.height) {
-          pieces.splice(i, 1);
-          pieces.push(new ConfettiPiece());
+    function showNextMessage() {
+      if (index < messages.length) {
+        container.innerHTML = ""; // 清空上一段文字
+        const text = document.createElement("div");
+        text.className = "text";
+        if (!isNaN(messages[index])) {
+          text.classList.add("big"); // 倒數字比較大
         }
-        ctx.fillStyle = p.color;
-        ctx.fillRect(p.x, p.y, p.size, p.size);
-      });
-      requestAnimationFrame(updateConfetti);
+        text.textContent = messages[index];
+        container.appendChild(text);
+        index++;
+        setTimeout(showNextMessage, 2000); // 每段顯示 2 秒
+      }
     }
 
-    setInterval(createConfetti, 100);
-    updateConfetti();
+    showNextMessage();
+
+    // 紙屑效果
+    function createConfetti() {
+      const confetti = document.createElement("div");
+      confetti.classList.add("confetti");
+
+      // 隨機顏色
+      const colors = ["#ff0", "#0f0", "#0ff", "#f0f", "#f00", "#00f"];
+      confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+
+      // 隨機位置
+      confetti.style.left = Math.random() * window.innerWidth + "px";
+
+      // 隨機大小
+      const size = Math.random() * 8 + 5;
+      confetti.style.width = size + "px";
+      confetti.style.height = size + "px";
+
+      // 隨機動畫時間
+      const duration = Math.random() * 3 + 2;
+      confetti.style.animationDuration = duration + "s";
+
+      document.body.appendChild(confetti);
+
+      // 動畫結束後刪除
+      setTimeout(() => {
+        confetti.remove();
+      }, duration * 1000);
+    }
+
+    // 不斷生成紙屑
+    setInterval(createConfetti, 150);
   </script>
+
 </body>
 </html>
