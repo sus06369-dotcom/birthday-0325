@@ -45,14 +45,14 @@
 
     /* 紙屑樣式 */
     .confetti {
-      position: absolute;
-      width: 10px;
-      height: 10px;
-      background-color: red;
-      opacity: 0.7;
-      top: -10px;
-      animation: fall linear forwards;
-    }
+  position: absolute;
+  width: 14px;   /* 基本大小再大一點 */
+  height: 14px;
+  border-radius: 50%; /* 圓形看起來更像彩紙 */
+  opacity: 0.8;
+  top: -10px;
+  animation: fall linear forwards;
+}
 
     @keyframes fall {
       to {
@@ -105,34 +105,33 @@
 
     showNextMessage();
 
-    // 紙屑效果
     function createConfetti() {
       const confetti = document.createElement("div");
       confetti.classList.add("confetti");
 
-      // 隨機顏色
-      const colors = ["#ff0", "#0f0", "#0ff", "#f0f", "#f00", "#00f"];
-      confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+  // 紫粉色系的顏色
+  const colors = ["#d8b4fe", "#fbc2eb", "#a78bfa", "#c084fc", "#e9d5ff"];
+  confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
 
-      // 隨機位置
-      confetti.style.left = Math.random() * window.innerWidth + "px";
+  // 隨機位置
+  confetti.style.left = Math.random() * window.innerWidth + "px";
 
-      // 隨機大小
-      const size = Math.random() * 8 + 5;
-      confetti.style.width = size + "px";
-      confetti.style.height = size + "px";
+  // 隨機大小（大一些）
+  const size = Math.random() * 12 + 10;
+  confetti.style.width = size + "px";
+  confetti.style.height = size + "px";
 
-      // 隨機動畫時間
-      const duration = Math.random() * 3 + 2;
-      confetti.style.animationDuration = duration + "s";
+  // 隨機動畫時間
+  const duration = Math.random() * 3 + 3;
+  confetti.style.animationDuration = duration + "s";
 
-      document.body.appendChild(confetti);
+  document.body.appendChild(confetti);
 
-      // 動畫結束後刪除
-      setTimeout(() => {
-        confetti.remove();
-      }, duration * 1000);
-    }
+  // 動畫結束後刪除
+  setTimeout(() => {
+    confetti.remove();
+  }, duration * 1000);
+}
 
     // 不斷生成紙屑
     setInterval(createConfetti, 150);
