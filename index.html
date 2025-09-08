@@ -127,23 +127,31 @@
   </div>
 
   <script>
-    function checkLogin() {
-      const name = document.getElementById("nameInput").value.trim();
-      const password = document.getElementById("passwordInput").value.trim();
+  function checkLogin() {
+    const name = document.getElementById("nameInput").value.trim();
+    const password = document.getElementById("passwordInput").value.trim();
 
-      if (name === "芝茉妲絲" && password === "0325") {
-        // ✅ 進入下一頁（目前先跳到 test.html，之後你可以再改）
-        window.location.href = "next.html";
-      } else {
-        // ❌ 顯示錯誤視窗
-        document.getElementById("errorModal").style.display = "flex";
-      }
-    }
+    if (name === "芝茉妲絲" && password === "0325") {
+      // ✅ 先啟動背景音樂
+      const audio = new Audio("Blessing.mp3"); // 這裡換成你上傳的音樂檔案名稱
+      audio.loop = true;
+      audio.play();
 
-    function closeModal() {
-      document.getElementById("errorModal").style.display = "none";
+      // ✅ 把音樂存到全域，讓下一頁也能用
+      window.localStorage.setItem("bgmPlaying", "true");
+
+      // 跳轉到下一頁
+      window.location.href = "next.html";
+    } else {
+      // ❌ 顯示錯誤視窗
+      document.getElementById("errorModal").style.display = "flex";
     }
-  </script>
+  }
+
+  function closeModal() {
+    document.getElementById("errorModal").style.display = "none";
+  }
+</script>
 
 </body>
 </html>
