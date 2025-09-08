@@ -66,18 +66,11 @@
   <div id="text-container"></div>
 
   <!-- 背景音樂 -->
-  <audio id="bgm" loop>
+  <audio id="bg-music" autoplay loop>
     <source src="Blessing.mp3" type="audio/mp3">
   </audio>
-  
+
   <script>
-    const bgm = document.getElementById("bgm");
-    if (window.localStorage.getItem("bgmPlaying") === "true") {
-      bgm.play().catch(() => {
-        console.log("需要互動才能播放音樂");
-    });
-  }
-  </script>
     // 文字內容
     const messages = [
       "嘿～芝茉妲絲",
