@@ -15,7 +15,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background: linear-gradient(to right, #d8b4fe, #fbc2eb); /* 粉紫漸層 */
+      background: linear-gradient(to right, #d8b4fe, #fbc2eb);
       font-family: 'Noto Sans TC', sans-serif;
       overflow: hidden;
       position: relative;
@@ -24,27 +24,32 @@
     /* 文字動畫 */
     .text {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(0.5);
       font-size: 3em;
       font-weight: bold;
       color: #4b0082;
       opacity: 0;
+      transform: scale(0.5);
       text-align: center;
-      white-space: nowrap; /* 防止文字換行 */
+      width: 100%;
+      animation: zoomIn 2s forwards;
+    }
+
+    /* 倒數數字更大 + 淡出 */
+    .big {
+      font-size: 6em;
       animation: zoomInOut 2s forwards;
     }
 
-    /* 倒數數字更大 */
-    .big {
-      font-size: 6em;
+    @keyframes zoomIn {
+      0% { opacity: 0; transform: scale(0.5); }
+      50% { opacity: 1; transform: scale(1.2); }
+      100% { opacity: 1; transform: scale(1); }
     }
 
     @keyframes zoomInOut {
-      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
-      20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
-      50% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      0% { opacity: 0; transform: scale(0.5); }
+      20% { opacity: 1; transform: scale(1.2); }
+      50% { opacity: 1; transform: scale(1); }
       80% { opacity: 1; }
       100% { opacity: 0; }
     }
@@ -76,7 +81,7 @@
   </audio>
 
   <script>
-    // 確保音樂自動播放（依靠第一頁的觸發）
+    // 音樂播放（依靠第一頁的觸發）
     const bgm = document.getElementById("bg-music");
     if (localStorage.getItem("bgmAllowed") === "true") {
       bgm.play().catch(() => {
@@ -110,7 +115,6 @@
         text.textContent = messages[index];
         container.appendChild(text);
 
-        // 每段顯示完畢後換下一段
         setTimeout(() => {
           text.remove();
           index++;
@@ -126,31 +130,24 @@
       const confetti = document.createElement("div");
       confetti.classList.add("confetti");
 
-      // 彩虹顏色
       const colors = ["#ff0", "#0f0", "#0ff", "#f0f", "#f00", "#00f"];
       confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
 
-      // 隨機位置
       confetti.style.left = Math.random() * window.innerWidth + "px";
-
-      // 隨機大小（5px ~ 20px）
       const size = Math.random() * 15 + 5;
       confetti.style.width = size + "px";
       confetti.style.height = size + "px";
 
-      // 隨機動畫時間（2s ~ 5s）
       const duration = Math.random() * 3 + 2;
       confetti.style.animationDuration = duration + "s";
 
       document.body.appendChild(confetti);
 
-      // 動畫結束後刪除
       setTimeout(() => {
         confetti.remove();
       }, duration * 1000);
     }
 
-    // 不斷生成紙屑
     setInterval(createConfetti, 120);
   </script>
 
