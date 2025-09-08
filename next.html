@@ -1,106 +1,88 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>生日小驚喜 Part 2</title>
 
-  <!-- Google Font (可換) -->
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@700&display=swap" rel="stylesheet"/>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@700&display=swap" rel="stylesheet">
 
   <style>
-    html,body{
-      margin:0;
-      height:100%;
-      font-family: 'Noto Sans TC', sans-serif;
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       background: linear-gradient(to right, #d8b4fe, #fbc2eb); /* 粉紫漸層 */
-      overflow:hidden;
-      color:#4b0082;
+      font-family: 'Noto Sans TC', sans-serif;
+      overflow: hidden;
+      position: relative;
     }
 
-    /* 文字容器：置中顯示，每段輪播 */
-    #text-container{
-      position:relative;
-      z-index:2;
-      width:100%;
-      height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      padding:2rem;
-      box-sizing:border-box;
+    /* 文字動畫 */
+    .text {
+      position: absolute;
+      font-size: 3em;
+      font-weight: bold;
+      color: #4b0082;
+      opacity: 0;
+      transform: scale(0.5);
+      text-align: center;
+      width: 100%;
+      animation: zoomInOut 2s forwards;
     }
 
-    .text{
-      display:block;
-      opacity:0;
-      transform:scale(0.6);
-      transition: transform 0.55s cubic-bezier(.2,.8,.2,1), opacity 0.5s;
-      white-space:nowrap;
-      line-height:1;
+    /* 倒數數字更大 */
+    .big {
+      font-size: 6em;
     }
 
-    .text.show{
-      opacity:1;
-      transform:scale(1);
+    @keyframes zoomInOut {
+      0% { opacity: 0; transform: scale(0.5); }
+      20% { opacity: 1; transform: scale(1.2); }
+      50% { opacity: 1; transform: scale(1); }
+      80% { opacity: 1; }
+      100% { opacity: 0; }
     }
 
-    /* 普通字與倒數字大小 */
-    .normal { font-size: clamp(28px, 6vw, 64px); }
-    .big    { font-size: clamp(72px, 18vw, 180px); }
-
-    /* 彩屑樣式（JS 會設定寬高與位置） */
-    .confetti{
-      position:absolute;
-      top:-20px;
-      border-radius:2px;
-      opacity:0.95;
-      z-index:1;
+    /* 彩屑樣式 */
+    .confetti {
+      position: absolute;
+      border-radius: 2px;
+      opacity: 0.8;
+      top: -10px;
       animation: fall linear forwards;
-      pointer-events:none;
-    }
-    @keyframes fall {
-      to { transform: translateY(110vh) rotate(720deg); }
     }
 
-    /* 小播放按鈕（若自動播放被阻擋就會顯示） */
-    #playBtn{
-      position:fixed;
-      right:18px;
-      bottom:18px;
-      z-index:9999;
-      background: rgba(75,0,130,0.95);
-      color: white;
-      border: none;
-      width:48px;
-      height:48px;
-      border-radius:50%;
-      display:none;
-      align-items:center;
-      justify-content:center;
-      font-size:18px;
-      cursor:pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    @keyframes fall {
+      to {
+        transform: translateY(100vh) rotate(720deg);
+      }
     }
   </style>
 </head>
 <body>
 
-  <!-- 文字顯示區 -->
+  <!-- 顯示文字 -->
   <div id="text-container"></div>
 
-  <!-- 背景音樂：把下面檔名改成你上傳的檔名（例如 Blessing.mp3 / bgm.mp3） -->
-  <audio id="bgm" preload="auto" loop>
-    <source src="Blessing.mp3" type="audio/mpeg">
-    你的瀏覽器不支援音訊播放
+  <!-- 背景音樂 -->
+  <audio id="bg-music" loop>
+    <source src="Blessing.mp3" type="audio/mp3">
   </audio>
 
-  <!-- 若自動播放被阻擋，會顯示的播放按鈕 -->
-  <button id="playBtn" title="播放音樂">▶</button>
-
   <script>
-    /* ----- 文字順序 ----- */
+    // 確保音樂自動播放（依靠第一頁的觸發）
+    const bgm = document.getElementById("bg-music");
+    if (localStorage.getItem("bgmAllowed") === "true") {
+      bgm.play().catch(() => {
+        console.log("需要互動才能播放音樂");
+      });
+    }
+
+    // 文字內容
     const messages = [
       "嘿～芝茉妲絲",
       "今天是屬於",
@@ -110,100 +92,65 @@
       "就算還沒👀",
       "也給我準備好😎",
       "不等你的🥳",
-      "5","4","3","2","1"
+      "5", "4", "3", "2", "1"
     ];
 
-    const container = document.getElementById('text-container');
+    let index = 0;
+    const container = document.getElementById("text-container");
 
-    // helper：顯示單段文字（清空前一段）
-    function showTextNow(text, isBig=false){
-      container.innerHTML = '';
-      const el = document.createElement('div');
-      el.className = 'text ' + (isBig ? 'big' : 'normal');
-      el.textContent = text;
-      container.appendChild(el);
-      // 允許一幀後加上 show 以觸發 transition
-      requestAnimationFrame(()=> el.classList.add('show'));
-    }
+    function showNextMessage() {
+      if (index < messages.length) {
+        const text = document.createElement("div");
+        text.className = "text";
+        if (!isNaN(messages[index])) {
+          text.classList.add("big"); // 倒數字比較大
+        }
+        text.textContent = messages[index];
+        container.appendChild(text);
 
-    // 主流程：每段顯示間隔（ms）
-    const intervalMs = 1800;
-    let idx = 0;
-
-    function runSequence(){
-      if(idx >= messages.length) {
-        // 完成後停在最後一段（或改成跳第三頁）
-        return;
-      }
-      const msg = messages[idx];
-      const isNumber = !isNaN(msg);
-      showTextNow(msg, isNumber);
-      // 第一次顯示時嘗試播放音樂（多做嘗試）
-      if(idx === 0) tryPlayBgm();
-      idx++;
-      setTimeout(runSequence, intervalMs);
-    }
-
-    /* ----- 背景音樂播放處理 ----- */
-    const bgm = document.getElementById('bgm');
-    const playBtn = document.getElementById('playBtn');
-
-    async function tryPlayBgm(){
-      try {
-        await bgm.play();
-        playBtn.style.display = 'none';
-      } catch (e) {
-        // 被阻擋時顯示小按鈕，點擊任何地方也會嘗試播放
-        playBtn.style.display = 'flex';
-        const onUser = () => {
-          bgm.play().catch(()=>{});
-          document.removeEventListener('click', onUser);
-          document.removeEventListener('touchstart', onUser);
-        };
-        document.addEventListener('click', onUser, { once:true });
-        document.addEventListener('touchstart', onUser, { once:true });
+        // 每段顯示完畢後換下一段
+        setTimeout(() => {
+          text.remove();
+          index++;
+          showNextMessage();
+        }, 2000); // 每段 2 秒
       }
     }
 
-    // 按鈕按下也會嘗試播放並隱藏按鈕
-    playBtn.addEventListener('click', async () => {
-      bgm.play().then(()=> playBtn.style.display='none').catch(()=>{});
-    });
+    showNextMessage();
 
-    /* ----- 彩屑（原本色彩） ----- */
-    function createConfetti(){
-      const c = document.createElement('div');
-      c.className = 'confetti';
-      // 原本明亮色彩（你先前的原色）
+    // 彩屑效果
+    function createConfetti() {
+      const confetti = document.createElement("div");
+      confetti.classList.add("confetti");
+
+      // 彩虹顏色
       const colors = ["#ff0", "#0f0", "#0ff", "#f0f", "#f00", "#00f"];
-      c.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
-      // 隨機水平位置
-      c.style.left = Math.random() * window.innerWidth + 'px';
-      // 隨機大小（回到原來的尺寸）
-      const size = Math.random()*8 + 5; // 5 ~ 13 px
-      c.style.width = size + 'px';
-      c.style.height = size + 'px';
-      // 飄落速度
-      const duration = Math.random()*3 + 2; // 2 ~ 5s
-      c.style.animationDuration = duration + 's';
+      confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
 
-      document.body.appendChild(c);
-      // 移除
-      setTimeout(()=> c.remove(), duration*1000 + 200);
+      // 隨機位置
+      confetti.style.left = Math.random() * window.innerWidth + "px";
+
+      // 隨機大小（5px ~ 20px）
+      const size = Math.random() * 15 + 5;
+      confetti.style.width = size + "px";
+      confetti.style.height = size + "px";
+
+      // 隨機動畫時間（2s ~ 5s）
+      const duration = Math.random() * 3 + 2;
+      confetti.style.animationDuration = duration + "s";
+
+      document.body.appendChild(confetti);
+
+      // 動畫結束後刪除
+      setTimeout(() => {
+        confetti.remove();
+      }, duration * 1000);
     }
 
-    // 連續生成（回到原來密度）
-    const confettiInterval = setInterval(createConfetti, 150);
-
-    /* ----- 啟動 ----- */
-    // resize 處理：若需要擴展可加上
-    window.addEventListener('resize', () => { /* 無需重算 CSS confetti */ });
-
-    // 開始文字流程
-    runSequence();
-
-    // 也在載入時嘗試播放一次（若可）
-    tryPlayBgm();
+    // 不斷生成紙屑
+    setInterval(createConfetti, 120);
   </script>
+
 </body>
 </html>
