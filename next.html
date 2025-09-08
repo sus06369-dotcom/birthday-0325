@@ -25,7 +25,6 @@
     position:relative;
   }
 
-  /* 每段 message 都是一張 full-screen slide */
   .slide{
     position:fixed;
     inset:0;
@@ -33,25 +32,34 @@
     align-items:center;
     justify-content:center;
     pointer-events:none;
-    background: transparent; /* 🔹不遮住漸層背景 */
   }
 
   .message{
     text-align:center;
-    max-width:95%;
+    max-width:90%;
     padding:0 12px;
     color:var(--fg);
     font-weight:700;
-    opacity:0;
-    transform:scale(.6);
-    font-size: clamp(24px, 6.5vw, 60px); /* 🔹更彈性，不會超出 */
-    transition: transform .55s cubic-bezier(.2,.8,.2,1), opacity .45s;
-    white-space: nowrap; /* 🔹強制不換行 */
+    white-space: nowrap;
     overflow:hidden;
   }
 
+  /* 🔹 中文文字動畫（只有縮放，不淡出） */
+  .message.text{
+    font-size: clamp(28px, 7.5vw, 72px);
+    animation: textZoomIn 1.8s forwards;
+  }
+
+  @keyframes textZoomIn{
+    0%   { opacity:0; transform: scale(0.5); }
+    25%  { opacity:1; transform: scale(1.2); }
+    55%  { opacity:1; transform: scale(1); }
+    100% { opacity:1; transform: scale(1); }
+  }
+
+  /* 🔹 倒數數字維持原本縮放＋淡出 */
   .message.number{
-    font-size: clamp(48px, 22vw, 160px); /* 🔹數字更大但不會超出 */
+    font-size: clamp(64px, 28vw, 220px);
     animation: numberZoomFade 2s forwards;
   }
 
@@ -61,11 +69,6 @@
     55%  { opacity:1; transform: scale(1); }
     90%  { opacity:1; transform: scale(1); }
     100% { opacity:0; transform: scale(1); }
-  }
-
-  .message.in{
-    opacity:1;
-    transform: scale(1);
   }
 
   .confetti{
@@ -85,8 +88,8 @@
   }
 
   @media (max-width:420px){
-    .message{ font-size: clamp(20px, 8vw, 34px); }
-    .message.number{ font-size: clamp(40px, 28vw, 120px); }
+    .message.text{ font-size: clamp(20px, 8.5vw, 40px); }
+    .message.number{ font-size: clamp(48px, 30vw, 160px); }
   }
 </style>
 </head>
@@ -98,9 +101,10 @@
 
 <script>
 const bgm = document.getElementById('bgm');
-const bgmAllowed = localStorage.getItem('bgmAllowed') === 'true';
-if (bgmAllowed) {
-  bgm.play().catch(()=>{ console.log('⚠️ bgm.play() 被阻擋'); });
+const wantA = localStorage.getItem('bgmAllowed') === 'true';
+const wantB = localStorage.getItem('bgmPlaying') === 'true';
+if (wantA || wantB) {
+  bgm.play().catch(()=>{ console.log('bgm.play() 被阻擋'); });
 }
 
 const messages = [
@@ -116,7 +120,7 @@ const messages = [
 ];
 
 let idx = 0;
-const DURATION_NORMAL = 1800;
+const DURATION_NORMAL = 2000;
 const DURATION_NUMBER = 2000;
 
 function showNext(){
@@ -128,13 +132,11 @@ function showNext(){
   slide.className = 'slide';
 
   const msg = document.createElement('div');
-  msg.className = 'message' + (isNumber ? ' number' : '');
+  msg.className = 'message ' + (isNumber ? 'number' : 'text');
   msg.textContent = txt;
 
   slide.appendChild(msg);
   document.body.appendChild(slide);
-
-  requestAnimationFrame(()=> msg.classList.add('in'));
 
   const dur = isNumber ? DURATION_NUMBER : DURATION_NORMAL;
   setTimeout(()=> {
