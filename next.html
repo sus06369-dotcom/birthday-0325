@@ -15,7 +15,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background: linear-gradient(to right, #d8b4fe, #fbc2eb);
+      background: linear-gradient(to right, #d8b4fe, #fbc2eb); /* 粉紫漸層 */
       font-family: 'Noto Sans TC', sans-serif;
       overflow: hidden;
       position: relative;
@@ -29,6 +29,7 @@
       opacity: 0;
       transform: scale(0.5);
       animation: showText 1s forwards;
+      text-align: center;
     }
 
     /* 倒數字要更大 */
@@ -45,14 +46,14 @@
 
     /* 紙屑樣式 */
     .confetti {
-  position: absolute;
-  width: 14px;   /* 基本大小再大一點 */
-  height: 14px;
-  border-radius: 50%; /* 圓形看起來更像彩紙 */
-  opacity: 0.8;
-  top: -10px;
-  animation: fall linear forwards;
-}
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background-color: red;
+      opacity: 0.9;
+      top: -10px;
+      animation: fall linear forwards;
+    }
 
     @keyframes fall {
       to {
@@ -67,8 +68,8 @@
   <div id="text-container"></div>
 
   <!-- 背景音樂 -->
-  <audio id="Blessing.mp3" autoplay loop>
-    <source src="your-music.mp3" type="audio/mp3">
+  <audio autoplay loop>
+    <source src="Bless.mp3" type="audio/mp3">
   </audio>
 
   <script>
@@ -105,36 +106,37 @@
 
     showNextMessage();
 
+    // 紙屑效果
     function createConfetti() {
       const confetti = document.createElement("div");
       confetti.classList.add("confetti");
 
-  // 紫粉色系的顏色
-  const colors = ["#d8b4fe", "#fbc2eb", "#a78bfa", "#c084fc", "#e9d5ff"];
-  confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      // 🎨 改成亮色派對色盤
+      const colors = ["#FFD700", "#FF69B4", "#00BFFF", "#7CFC00", "#FF4500", "#FFFFFF"];
+      confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
 
-  // 隨機位置
-  confetti.style.left = Math.random() * window.innerWidth + "px";
+      // 隨機位置
+      confetti.style.left = Math.random() * window.innerWidth + "px";
 
-  // 隨機大小（大一些）
-  const size = Math.random() * 12 + 10;
-  confetti.style.width = size + "px";
-  confetti.style.height = size + "px";
+      // 隨機大小（大一點）
+      const size = Math.random() * 12 + 8;
+      confetti.style.width = size + "px";
+      confetti.style.height = size + "px";
 
-  // 隨機動畫時間
-  const duration = Math.random() * 3 + 3;
-  confetti.style.animationDuration = duration + "s";
+      // 隨機動畫時間
+      const duration = Math.random() * 3 + 2.5;
+      confetti.style.animationDuration = duration + "s";
 
-  document.body.appendChild(confetti);
+      document.body.appendChild(confetti);
 
-  // 動畫結束後刪除
-  setTimeout(() => {
-    confetti.remove();
-  }, duration * 1000);
-}
+      // 動畫結束後刪除
+      setTimeout(() => {
+        confetti.remove();
+      }, duration * 1000);
+    }
 
     // 不斷生成紙屑
-    setInterval(createConfetti, 150);
+    setInterval(createConfetti, 120);
   </script>
 
 </body>
