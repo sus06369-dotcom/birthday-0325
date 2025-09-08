@@ -4,22 +4,166 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>第二頁</title>
+
   <style>
     body {
       margin: 0;
+      height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      background: linear-gradient(to right, #fbc2eb, #d8b4fe); /* 粉紫漸層 */
+      overflow: hidden;
       font-family: "Noto Sans TC", sans-serif;
-      background: linear-gradient(to right, #fbc2eb, #a6c1ee); /* 粉紫漸層 */
     }
-    h1 {
+
+    #container {
+      font-size: 3em;
       color: #4b0082;
+      text-align: center;
+      animation: fadeIn 1s ease;
+    }
+
+    .text {
+      animation: zoomIn 1s ease;
+    }
+
+    @keyframes zoomIn {
+      from { transform: scale(0); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* 彩帶 */
+    .confetti {
+      position: fixed;
+      top: -10px;
+      width: 10px;
+      height: 10px;
+      background-color: red;
+      opacity: 0.7;
+      animation: fall linear forwards;
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(100vh) rotate(720deg);
+      }
+    }
+
+    /* 爆炸抖動 */
+    @keyframes shake {
+      0% { transform: translate(0px, 0px); }
+      20% { transform: translate(-10px, 0px); }
+      40% { transform: translate(10px, 0px); }
+      60% { transform: translate(-10px, 0px); }
+      80% { transform: translate(10px, 0px); }
+      100% { transform: translate(0px, 0px); }
     }
   </style>
 </head>
 <body>
-  <h1>🎉 恭喜你成功進來第二頁！ 🎶</h1>
+
+  <!-- 背景音樂（可換成你的檔案） -->
+  <audio id="bgm" autoplay loop>
+    <source src="music.mp3" type="audio/mpeg">
+    你的瀏覽器不支援音樂播放
+  </audio>
+
+  <div id="container"></div>
+
+  <script>
+    const messages = [
+      "5",
+      "4",
+      "3",
+      "2",
+      "1",
+      "嘿～芝茉妲絲",
+      "今天是屬於",
+      "🫵🏻🫵🏻你🫵🏻🫵🏻",
+      "特別日子！！！",
+      "準備好了嗎？🧐",
+      "就算還沒👀",
+      "也給我準備好😎",
+      "不等你的🥳"
+    ];
+
+    const container = document.getElementById("container");
+
+    let i = 0;
+    function showMessage() {
+      if (i < messages.length) {
+        const msg = document.createElement("div");
+        msg.className = "text";
+        msg.textContent = messages[i];
+        container.innerHTML = "";
+        container.appendChild(msg);
+
+        // 👉 如果是最後一句，就觸發爆炸特效
+        if (i === messages.length - 1) {
+          setTimeout(() => {
+            triggerExplosion();
+          }, 2000);
+        }
+
+        i++;
+        setTimeout(showMessage, 1500);
+      }
+    }
+    showMessage();
+
+    // 🎉 彩帶效果
+    function createConfetti() {
+      const confetti = document.createElement("div");
+      confetti.classList.add("confetti");
+      document.body.appendChild(confetti);
+
+      const colors = ["#ff6b6b", "#feca57", "#1dd1a1", "#54a0ff", "#5f27cd", "#ff9ff3"];
+      confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      confetti.style.left = Math.random() * 100 + "vw";
+      confetti.style.width = confetti.style.height = Math.random() * 8 + 6 + "px";
+      const duration = Math.random() * 3 + 2;
+      confetti.style.animationDuration = duration + "s";
+
+      setTimeout(() => {
+        confetti.remove();
+      }, duration * 1000);
+    }
+    setInterval(createConfetti, 150);
+
+    // 💥 爆炸閃光 + 抖動
+    function triggerExplosion() {
+      const flash = document.createElement("div");
+      flash.style.position = "fixed";
+      flash.style.top = 0;
+      flash.style.left = 0;
+      flash.style.width = "100%";
+      flash.style.height = "100%";
+      flash.style.background = "white";
+      flash.style.opacity = 0;
+      flash.style.zIndex = 9999;
+      flash.style.transition = "opacity 0.2s";
+      document.body.appendChild(flash);
+
+      // 閃光
+      setTimeout(() => { flash.style.opacity = 1; }, 50);
+      setTimeout(() => { flash.style.opacity = 0; }, 300);
+
+      // 抖動
+      document.body.style.animation = "shake 0.5s";
+      document.body.style.animationIterationCount = "1";
+
+      // 0.8 秒後跳轉
+      setTimeout(() => {
+        window.location.href = "third.html";
+      }, 800);
+    }
+  </script>
+
 </body>
 </html>
