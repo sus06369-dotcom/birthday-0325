@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>第二頁</title>
+  <title>生日驚喜 - 第二頁</title>
+
+  <!-- Google Fonts (可換成你喜歡的) -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@700&display=swap" rel="stylesheet">
 
   <style>
     body {
@@ -12,69 +15,45 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background: linear-gradient(to right, #fbc2eb, #d8b4fe); /* 粉紫漸層 */
-      overflow: hidden;
+      background: linear-gradient(to right, #fbc2eb, #d8b4fe);
       font-family: "Noto Sans TC", sans-serif;
-    }
-
-    #container {
-      font-size: 3em;
-      color: #4b0082;
-      text-align: center;
-      animation: fadeIn 1s ease;
+      overflow: hidden;
     }
 
     .text {
-      animation: zoomIn 1s ease;
+      font-size: 2.5em;
+      color: #4b0082;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+      position: absolute;
+      text-align: center;
     }
 
-    @keyframes zoomIn {
-      from { transform: scale(0); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
+    .text.show {
+      opacity: 1;
+      transform: scale(1.2);
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    /* 彩帶 */
-    .confetti {
-      position: fixed;
-      top: -10px;
-      width: 10px;
-      height: 10px;
-      background-color: red;
-      opacity: 0.7;
-      animation: fall linear forwards;
-    }
-
-    @keyframes fall {
-      to {
-        transform: translateY(100vh) rotate(720deg);
-      }
-    }
-
-    /* 爆炸抖動 */
-    @keyframes shake {
-      0% { transform: translate(0px, 0px); }
-      20% { transform: translate(-10px, 0px); }
-      40% { transform: translate(10px, 0px); }
-      60% { transform: translate(-10px, 0px); }
-      80% { transform: translate(10px, 0px); }
-      100% { transform: translate(0px, 0px); }
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
     }
   </style>
 </head>
 <body>
-
-  <!-- 背景音樂（可換成你的檔案） -->
-  <audio id="bgm" autoplay loop>
-    <source src="music.mp3" type="audio/mpeg">
-    你的瀏覽器不支援音樂播放
-  </audio>
-
+  <!-- 文字容器 -->
   <div id="container"></div>
+  <!-- 彩帶粒子 -->
+  <canvas id="confetti"></canvas>
+  <!-- 背景音樂 (你之後可換成本機檔案名稱) -->
+  <audio id="bgm" autoplay>
+    <source src="music.mp3" type="audio/mpeg">
+  </audio>
 
   <script>
     const messages = [
@@ -94,76 +73,68 @@
     ];
 
     const container = document.getElementById("container");
+    let index = 0;
 
-    let i = 0;
     function showMessage() {
-      if (i < messages.length) {
-        const msg = document.createElement("div");
-        msg.className = "text";
-        msg.textContent = messages[i];
-        container.innerHTML = "";
-        container.appendChild(msg);
+      if (index >= messages.length) return;
 
-        // 👉 如果是最後一句，就觸發爆炸特效
-        if (i === messages.length - 1) {
-          setTimeout(() => {
-            triggerExplosion();
-          }, 2000);
-        }
+      const text = document.createElement("div");
+      text.className = "text";
+      text.textContent = messages[index];
+      container.appendChild(text);
 
-        i++;
-        setTimeout(showMessage, 1500);
+      // 顯示文字
+      setTimeout(() => {
+        text.classList.add("show");
+        launchConfetti(); // 彩帶爆炸
+      }, 100);
+
+      // 移除舊文字
+      setTimeout(() => {
+        text.remove();
+        index++;
+        showMessage();
+      }, 2000);
+    }
+
+    // 彩帶效果
+    const canvas = document.getElementById("confetti");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let confettis = [];
+
+    function launchConfetti() {
+      for (let i = 0; i < 100; i++) {
+        confettis.push({
+          x: canvas.width / 2,
+          y: canvas.height / 2,
+          dx: (Math.random() - 0.5) * 8,
+          dy: (Math.random() - 0.5) * 8,
+          size: Math.random() * 5 + 2,
+          color: `hsl(${Math.random() * 360}, 100%, 60%)`,
+          life: 100
+        });
       }
     }
+
+    function drawConfetti() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      confettis.forEach((c, i) => {
+        ctx.fillStyle = c.color;
+        ctx.fillRect(c.x, c.y, c.size, c.size);
+        c.x += c.dx;
+        c.y += c.dy;
+        c.dy += 0.1; // 重力
+        c.life--;
+        if (c.life <= 0) confettis.splice(i, 1);
+      });
+      requestAnimationFrame(drawConfetti);
+    }
+
+    drawConfetti();
     showMessage();
-
-    // 🎉 彩帶效果
-    function createConfetti() {
-      const confetti = document.createElement("div");
-      confetti.classList.add("confetti");
-      document.body.appendChild(confetti);
-
-      const colors = ["#ff6b6b", "#feca57", "#1dd1a1", "#54a0ff", "#5f27cd", "#ff9ff3"];
-      confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-      confetti.style.left = Math.random() * 100 + "vw";
-      confetti.style.width = confetti.style.height = Math.random() * 8 + 6 + "px";
-      const duration = Math.random() * 3 + 2;
-      confetti.style.animationDuration = duration + "s";
-
-      setTimeout(() => {
-        confetti.remove();
-      }, duration * 1000);
-    }
-    setInterval(createConfetti, 150);
-
-    // 💥 爆炸閃光 + 抖動
-    function triggerExplosion() {
-      const flash = document.createElement("div");
-      flash.style.position = "fixed";
-      flash.style.top = 0;
-      flash.style.left = 0;
-      flash.style.width = "100%";
-      flash.style.height = "100%";
-      flash.style.background = "white";
-      flash.style.opacity = 0;
-      flash.style.zIndex = 9999;
-      flash.style.transition = "opacity 0.2s";
-      document.body.appendChild(flash);
-
-      // 閃光
-      setTimeout(() => { flash.style.opacity = 1; }, 50);
-      setTimeout(() => { flash.style.opacity = 0; }, 300);
-
-      // 抖動
-      document.body.style.animation = "shake 0.5s";
-      document.body.style.animationIterationCount = "1";
-
-      // 0.8 秒後跳轉
-      setTimeout(() => {
-        window.location.href = "third.html";
-      }, 800);
-    }
   </script>
-
 </body>
 </html>
