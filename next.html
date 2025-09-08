@@ -33,24 +33,25 @@
     align-items:center;
     justify-content:center;
     pointer-events:none;
+    background: transparent; /* 🔹不遮住漸層背景 */
   }
 
   .message{
     text-align:center;
-    max-width:90%;
+    max-width:95%;
     padding:0 12px;
     color:var(--fg);
     font-weight:700;
     opacity:0;
     transform:scale(.6);
-    font-size: clamp(28px, 7.5vw, 72px);
+    font-size: clamp(24px, 6.5vw, 60px); /* 🔹更彈性，不會超出 */
     transition: transform .55s cubic-bezier(.2,.8,.2,1), opacity .45s;
     white-space: nowrap; /* 🔹強制不換行 */
     overflow:hidden;
   }
 
   .message.number{
-    font-size: clamp(64px, 28vw, 220px);
+    font-size: clamp(48px, 22vw, 160px); /* 🔹數字更大但不會超出 */
     animation: numberZoomFade 2s forwards;
   }
 
@@ -84,8 +85,8 @@
   }
 
   @media (max-width:420px){
-    .message{ font-size: clamp(20px, 8.5vw, 40px); }
-    .message.number{ font-size: clamp(48px, 30vw, 160px); }
+    .message{ font-size: clamp(20px, 8vw, 34px); }
+    .message.number{ font-size: clamp(40px, 28vw, 120px); }
   }
 </style>
 </head>
@@ -97,10 +98,9 @@
 
 <script>
 const bgm = document.getElementById('bgm');
-const wantA = localStorage.getItem('bgmAllowed') === 'true';
-const wantB = localStorage.getItem('bgmPlaying') === 'true';
-if (wantA || wantB) {
-  bgm.play().catch(()=>{ console.log('bgm.play() 被阻擋'); });
+const bgmAllowed = localStorage.getItem('bgmAllowed') === 'true';
+if (bgmAllowed) {
+  bgm.play().catch(()=>{ console.log('⚠️ bgm.play() 被阻擋'); });
 }
 
 const messages = [
