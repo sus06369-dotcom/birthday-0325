@@ -85,79 +85,60 @@
     to { transform: translateY(110vh) translateX(var(--drift,0px)) rotate(720deg); }
   }
 
-  /* 🎂 蛋糕 */
+  /* 🎂 蛋糕區塊 */
   #cakeWrapper{
-    position: relative;
+    display:none;
     text-align:center;
     margin-top:40px;
   }
-  #cake1, #cake2 {
-    position:absolute;
-    top:50%;
-    left:50%;
-    transform:translate(-50%,-50%) scale(1);
-    max-width:40%;
-    opacity:0;
+  #cake1, #cake2{
+    width:320px;
+    max-width:85%;
     display:none;
+    margin:auto;
   }
 
-  /* 🎉 下方訊息和按鈕 */
-  #afterCake{
+  /* 🎉 お誕生日おめでとう */
+  #birthdayText{
     display:none;
     text-align:center;
-    margin-top:25px;
-  }
-
-  #afterCakeText{
-    font-size: clamp(32px, 6vw, 64px);
-    font-weight: 700;
-    animation: textZoomIn 1.8s forwards;
-  }
-
-  #buttons{
     margin-top:20px;
-    display:flex;
-    justify-content:center;  /* 置中整體 */
-    gap:80px;                /* 按鈕之間距離 */
+    font-size: clamp(32px, 7vw, 72px);
+    font-weight:bold;
+    animation: textZoomIn 2s forwards;
+  }
+
+  /* 🎉 按鈕區 */
+  #buttons{
+    display:none;
+    margin-top:20px;
+    text-align:center;
   }
   button{
     font-size:20px;
-    padding:10px 25px;
+    padding:10px 20px;
+    margin:0 15px;
     border:none;
     border-radius:8px;
     cursor:pointer;
     opacity:0;
-  }
-  #likeBtn{ background:#ffb6c1; }
-  #dislikeBtn{ background:#87ceeb; }
-
-  @keyframes fadeInLeft{
-    from{ opacity:0; transform:translateX(-60px); }
-    to{ opacity:1; transform:translateX(0); }
-  }
-  @keyframes fadeInRight{
-    from{ opacity:0; transform:translateX(60px); }
-    to{ opacity:1; transform:translateX(0); }
-  }
-
-  #emojiOverlay{
-    position:fixed;
-    top:50%; left:50%;
-    transform:translate(-50%,-50%) scale(0.5);
-    font-size:120px;
-    display:none;
-    z-index:10;
-    opacity:0;
     transition: all 1s ease;
   }
-  .emojiConfetti{
-    position:fixed;
-    top:-50px;
-    font-size:32px;
-    animation: emojiFall linear forwards;
+  #likeBtn{
+    background:#ffb6c1;
+    transform: translateX(-50px);
   }
-  @keyframes emojiFall{
-    to { transform: translateY(110vh) translateX(var(--drift,0px)); }
+  #dislikeBtn{
+    background:#87ceeb;
+    transform: translateX(50px);
+  }
+  #likeBtn.show{
+    opacity:1;
+    transform: translateX(0);
+  }
+  #dislikeBtn.show{
+    opacity:1;
+    transform: translateX(0);
   }
 </style>
 </head>
@@ -167,28 +148,42 @@
   <source src="blessing.mp3" type="audio/mpeg">
 </audio>
 
-<!-- 🎂 蛋糕 + 按鈕區 -->
+<!-- 🎂 蛋糕 -->
 <div id="cakeWrapper">
-  <video id="cake1" autoplay>
-    <source src="Cake1.webm" type="video/webm">
-  </video>
+  <video id="cake1" src="Cake1.webm" autoplay></video>
   <img id="cake2" src="Cake2.gif" />
 </div>
-<div id="afterCake">
-  <div id="afterCakeText">お誕生日おめでとう</div>
-  <div id="buttons">
-    <button id="likeBtn">我很喜歡</button>
-    <button id="dislikeBtn">我不喜歡</button>
-  </div>
+
+<!-- 🎉 文字 & 按鈕 -->
+<div id="birthdayText">お誕生日おめでとう</div>
+<div id="buttons">
+  <button id="likeBtn">我很喜歡</button>
+  <button id="dislikeBtn">我不喜歡</button>
 </div>
-<div id="emojiOverlay">🥺</div>
 
 <script>
 const bgm = document.getElementById('bgm');
-bgm.play().catch(()=>{ console.log('bgm.play() 被阻擋'); });
+const wantA = localStorage.getItem('bgmAllowed') === 'true';
+const wantB = localStorage.getItem('bgmPlaying') === 'true';
+if (wantA || wantB) {
+  bgm.play().catch(()=>{ console.log('bgm.play() 被阻擋'); });
+}
 
-const messages = ["嘿～芝茉妲絲","今天是屬於","🫵🏻🫵🏻你🫵🏻🫵🏻","特別日子！！！","準備好了嗎？🧐","就算還沒👀","也給我準備好😎","不等你的🥳","5","4","3","2","1"];
+const messages = [
+  "嘿～芝茉妲絲",
+  "今天是屬於",
+  "🫵🏻🫵🏻你🫵🏻🫵🏻",
+  "特別日子！！！",
+  "準備好了嗎？🧐",
+  "就算還沒👀",
+  "也給我準備好😎",
+  "不等你的🥳",
+  "5","4","3","2","1"
+];
+
 let idx = 0;
+const DURATION_NORMAL = 2000;
+const DURATION_NUMBER = 2000;
 
 function showNext(){
   if (idx >= messages.length) return;
@@ -205,7 +200,7 @@ function showNext(){
   slide.appendChild(msg);
   document.body.appendChild(slide);
 
-  const dur = 2000;
+  const dur = isNumber ? DURATION_NUMBER : DURATION_NORMAL;
   setTimeout(()=> {
     slide.remove();
     idx++;
@@ -235,31 +230,34 @@ setInterval(createConfetti, 120);
 
 // 🎂 顯示蛋糕
 function showCake(){
+  const cakeWrapper = document.getElementById("cakeWrapper");
   const cake1 = document.getElementById("cake1");
   const cake2 = document.getElementById("cake2");
-  cake1.style.display="block";
-  cake1.style.opacity=1;
+  cakeWrapper.style.display = "block";
+  cake1.style.display = "block";
 
-  cake1.addEventListener("ended", ()=>{
-    cake1.style.display="none";
-    cake2.style.display="block";
-    cake2.style.opacity=1;
+  cake1.onended = ()=>{
+    cake1.style.display = "none";
+    cake2.style.display = "block";
 
-    // 顯示「お誕生日おめでとう」
+    // 🎉 蛋糕切換後 立即顯示「お誕生日おめでとう」
     setTimeout(()=>{
-      document.getElementById("afterCake").style.display="block";
+      const text = document.getElementById("birthdayText");
+      text.style.display = "block";
+    },200);
 
-      // 按鈕延遲淡入
+    // 🎉 再顯示按鈕（淡入，左右進場）
+    setTimeout(()=>{
+      const buttons = document.getElementById("buttons");
       const likeBtn = document.getElementById("likeBtn");
       const dislikeBtn = document.getElementById("dislikeBtn");
-
+      buttons.style.display="block";
       setTimeout(()=>{
-        likeBtn.style.animation="fadeInLeft 1s forwards";
-        dislikeBtn.style.animation="fadeInRight 1s forwards";
-      },1800);
-
-    },200);
-  });
+        likeBtn.classList.add("show");
+        dislikeBtn.classList.add("show");
+      },50);
+    },2000);
+  }
 }
 </script>
 </body>
