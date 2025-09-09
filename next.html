@@ -44,10 +44,12 @@
     overflow:hidden;
   }
 
+  /* 🔹 中文文字動畫（縮放更明顯，不會馬上消失） */
   .message.text{
     font-size: clamp(28px, 7.5vw, 72px);
     animation: textZoomIn 2s forwards;
   }
+
   @keyframes textZoomIn{
     0%   { opacity:0; transform: scale(0.5); }
     25%  { opacity:1; transform: scale(1.25); }
@@ -55,10 +57,12 @@
     100% { opacity:1; transform: scale(1); }
   }
 
+  /* 🔹 倒數數字維持原本縮放＋淡出 */
   .message.number{
     font-size: clamp(64px, 28vw, 220px);
     animation: numberZoomFade 2s forwards;
   }
+
   @keyframes numberZoomFade{
     0%   { opacity:0; transform: scale(0.5); }
     25%  { opacity:1; transform: scale(1.25); }
@@ -78,6 +82,7 @@
     will-change: transform;
     animation: confettiFall linear forwards;
   }
+
   @keyframes confettiFall{
     to { transform: translateY(110vh) translateX(var(--drift,0px)) rotate(720deg); }
   }
@@ -122,8 +127,8 @@ const DURATION_NORMAL = 2000;
 const DURATION_NUMBER = 2000;
 
 function showNext(){
-  if (idx >= messages.length) {
-    showCake(); // 🎂 倒數完顯示蛋糕
+  if (idx >= messages.length){
+    showCake();
     return;
   }
   const txt = messages[idx];
@@ -148,6 +153,7 @@ function showNext(){
 }
 showNext();
 
+// 🎉 彩屑
 function createConfetti(){
   const c = document.createElement('div');
   c.className = 'confetti';
@@ -167,11 +173,15 @@ function createConfetti(){
 }
 setInterval(createConfetti, 120);
 
-// 🎂 畫蛋糕
+// 🎂 改良版 showCake()：模擬 Turtle 慢慢畫出蛋糕
 function showCake(){
   const canvas = document.getElementById("cakeCanvas");
   const ctx = canvas.getContext("2d");
   canvas.style.display = "block";
+
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = "#333";
+  ctx.fillStyle = "#fff";
 
   function roundRect(x, y, w, h, r, color){
     ctx.beginPath();
@@ -183,36 +193,55 @@ function showCake(){
     ctx.closePath();
     ctx.fillStyle = color;
     ctx.fill();
+    ctx.stroke();
   }
 
-  // 蛋糕層
-  roundRect(100, 250, 300, 80, 40, "#fff0f3");
-  roundRect(120, 220, 260, 60, 30, "#cbd9f9");
-  roundRect(150, 150, 200, 60, 30, "#ffe4e1");
-  roundRect(170, 120, 160, 50, 25, "#d08080");
+  let steps = [];
+
+  // 蛋糕底層
+  steps.push(()=> roundRect(100, 250, 300, 80, 40, "#fff0f3"));
+  steps.push(()=> roundRect(120, 220, 260, 60, 30, "#f2d7dd"));
+
+  // 蛋糕上層
+  steps.push(()=> roundRect(150, 150, 200, 60, 30, "#ffe4e1"));
+  steps.push(()=> roundRect(170, 120, 160, 50, 25, "#ffc3be"));
 
   // 蠟燭
   const candleX = [180, 220, 250, 280, 320];
   candleX.forEach(x=>{
-    ctx.fillStyle = "#87cefa";
-    ctx.fillRect(x, 90, 10, 40);
-    ctx.fillStyle = "white";
-    for(let i=0;i<5;i++){
-      ctx.fillRect(x, 90+i*8, 10, 2);
-    }
+    steps.push(()=>{
+      ctx.fillStyle = "#87cefa";
+      ctx.fillRect(x, 90, 10, 40);
+      ctx.fillStyle = "white";
+      for(let i=0;i<5;i++){
+        ctx.fillRect(x, 90+i*8, 10, 2);
+      }
+      ctx.strokeRect(x, 90, 10, 40);
+    });
   });
 
-  // 火焰動畫
-  function drawFlames(){
-    ctx.clearRect(0,0,canvas.width,90);
-    candleX.forEach(x=>{
-      ctx.beginPath();
-      ctx.ellipse(x+5, 80, 6, 10, 0, 0, Math.PI*2);
-      ctx.fillStyle = "rgba(255,165,0,"+(0.7+Math.random()*0.3)+")";
-      ctx.fill();
-    });
+  // 一步一步畫出來
+  let i = 0;
+  function drawStep(){
+    if(i < steps.length){
+      steps[i]();
+      i++;
+      setTimeout(drawStep, 500);
+    } else {
+      // 火焰動畫
+      function drawFlames(){
+        ctx.clearRect(0,0,canvas.width,90);
+        candleX.forEach(x=>{
+          ctx.beginPath();
+          ctx.ellipse(x+5, 80, 6, 10, 0, 0, Math.PI*2);
+          ctx.fillStyle = "rgba(255,165,0,"+(0.6+Math.random()*0.4)+")";
+          ctx.fill();
+        });
+      }
+      setInterval(drawFlames, 200);
+    }
   }
-  setInterval(drawFlames, 200);
+  drawStep();
 }
 </script>
 </body>
