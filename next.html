@@ -149,7 +149,7 @@
 
 <!-- 🎂 蛋糕 + 按鈕區 -->
 <div id="cakeWrapper">
-  <img id="cakeGif" src="cake1.gif" />
+  <img id="cakeGif" src="Cake1.gif" />
 </div>
 <div id="afterCake">
   <div>お誕生日おめでとう</div>
@@ -238,13 +238,13 @@ function showCake(){
     cakeGif.style.transform = "scale(1)";
   },100);
 
-  // 假設 cake1.gif 長度是 8 秒
+  // ⏳ 8 秒後切換 Cake2.gif
   setTimeout(()=>{
     cakeGif.style.opacity = 0;
     setTimeout(()=>{
-      cakeGif.src = "cake2.gif"; // 換成第二張
+      cakeGif.src = "Cake2.gif"; // 換成第二張
       cakeGif.style.opacity = 1;
-    },800);
+    },1500);
   },8000);
 
   // 25 秒後出現訊息和按鈕
