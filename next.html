@@ -44,20 +44,20 @@
     overflow:hidden;
   }
 
-  /* 中文文字縮放動畫 */
+  /* 🔹 中文文字動畫（縮放更明顯，不會馬上消失） */
   .message.text{
     font-size: clamp(28px, 7.5vw, 72px);
-    animation: textZoomIn 1.8s forwards;
+    animation: textZoomIn 2s forwards;
   }
 
   @keyframes textZoomIn{
     0%   { opacity:0; transform: scale(0.5); }
-    25%  { opacity:1; transform: scale(1.2); }
+    25%  { opacity:1; transform: scale(1.25); }
     55%  { opacity:1; transform: scale(1); }
     100% { opacity:1; transform: scale(1); }
   }
 
-  /* 倒數數字縮放 + 淡出 */
+  /* 🔹 倒數數字維持原本縮放＋淡出 */
   .message.number{
     font-size: clamp(64px, 28vw, 220px);
     animation: numberZoomFade 2s forwards;
@@ -71,7 +71,6 @@
     100% { opacity:0; transform: scale(1); }
   }
 
-  /* 彩屑 */
   .confetti{
     position: fixed;
     top: -18px;
@@ -88,75 +87,9 @@
     to { transform: translateY(110vh) translateX(var(--drift,0px)) rotate(720deg); }
   }
 
-  /* 🎂 蛋糕容器 */
-  .cake-container{
-    display:none;
-    position:fixed;
-    inset:0;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    flex-direction:column;
-    z-index:10;
-  }
-
-  .cake{
-    position: relative;
-    width: 200px;
-    height: 150px;
-  }
-
-  .layer{
-    position:absolute;
-    left:50%;
-    transform:translateX(-50%);
-    width:100%;
-    border-radius:20px;
-  }
-
-  .layer.bottom{
-    bottom:0;
-    height:60px;
-    background:#f2d7dd;
-  }
-
-  .layer.middle{
-    bottom:60px;
-    height:50px;
-    background:#cbd9f9;
-  }
-
-  .layer.top{
-    bottom:110px;
-    height:40px;
-    background:#ffaaa0;
-  }
-
-  .candle{
-    position:absolute;
-    width:10px;
-    height:30px;
-    background:#b1c9e9;
-    top:-30px;
-    border-radius:2px;
-  }
-
-  .candle::after{
-    content:"";
-    position:absolute;
-    top:-12px;
-    left:50%;
-    transform:translateX(-50%);
-    width:8px;
-    height:12px;
-    background:#f1add1;
-    border-radius:50%;
-    animation: flicker 0.5s infinite alternate;
-  }
-
-  @keyframes flicker{
-    from{opacity:1; transform:translateX(-50%) scaleY(1);}
-    to{opacity:0.6; transform:translateX(-50%) scaleY(0.8);}
+  @media (max-width:420px){
+    .message.text{ font-size: clamp(20px, 8.5vw, 40px); }
+    .message.number{ font-size: clamp(48px, 30vw, 160px); }
   }
 </style>
 </head>
@@ -165,16 +98,6 @@
 <audio id="bgm" autoplay loop>
   <source src="blessing.mp3" type="audio/mpeg">
 </audio>
-
-<div class="cake-container" id="cakeContainer">
-  <div class="cake">
-    <div class="layer bottom"></div>
-    <div class="layer middle"></div>
-    <div class="layer top"></div>
-    <div class="candle" style="left:30%;"></div>
-    <div class="candle" style="left:70%;"></div>
-  </div>
-</div>
 
 <script>
 const bgm = document.getElementById('bgm');
@@ -201,11 +124,7 @@ const DURATION_NORMAL = 2000;
 const DURATION_NUMBER = 2000;
 
 function showNext(){
-  if (idx >= messages.length) {
-    // 倒數結束 → 顯示蛋糕
-    document.getElementById("cakeContainer").style.display = "flex";
-    return;
-  }
+  if (idx >= messages.length) return;
   const txt = messages[idx];
   const isNumber = !isNaN(txt);
 
@@ -228,7 +147,6 @@ function showNext(){
 }
 showNext();
 
-// 🎉 彩屑持續
 function createConfetti(){
   const c = document.createElement('div');
   c.className = 'confetti';
