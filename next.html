@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8" />
@@ -105,6 +105,7 @@
     text-align:center;
     margin-top:25px;
     font-size:clamp(22px,5vw,40px);
+    animation: textZoomIn 2s forwards;
   }
   #buttons{
     margin-top:20px;
@@ -117,9 +118,11 @@
     border-radius:8px;
     cursor:pointer;
     transition: transform 0.3s ease;
+    color:#fff;
   }
-  #likeBtn{ background:#ffb6c1; }
-  #dislikeBtn{ background:#87ceeb; position:relative; }
+  #likeBtn{ background:#ff6fa5; }
+  #dislikeBtn{ background:#5aa9e6; position:relative; }
+
   #emojiOverlay{
     position:fixed;
     top:50%; left:50%;
@@ -138,6 +141,42 @@
   }
   @keyframes emojiFall{
     to { transform: translateY(110vh) translateX(var(--drift,0px)); }
+  }
+
+  /* ⛔ 自訂提示框 */
+  #customAlertOverlay{
+    position:fixed;
+    top:0;left:0;right:0;bottom:0;
+    background:rgba(0,0,0,0.5);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:100;
+  }
+  #customAlertBox{
+    background:#fff;
+    padding:20px;
+    border-radius:12px;
+    max-width:300px;
+    text-align:center;
+    font-size:18px;
+    color:#333;
+    transform:scale(0.7);
+    opacity:0;
+    transition: all 0.4s ease;
+  }
+  #customAlertBox.show{
+    transform:scale(1);
+    opacity:1;
+  }
+  #alertOk{
+    margin-top:15px;
+    padding:8px 16px;
+    background:#ff6fa5;
+    border:none;
+    border-radius:6px;
+    color:#fff;
+    cursor:pointer;
   }
 </style>
 </head>
@@ -159,6 +198,14 @@
   </div>
 </div>
 <div id="emojiOverlay">🥺</div>
+
+<!-- ⛔ 自訂提示框 -->
+<div id="customAlertOverlay">
+  <div id="customAlertBox">
+    <div id="customAlertMsg"></div>
+    <button id="alertOk">好吧</button>
+  </div>
+</div>
 
 <script>
 const bgm = document.getElementById('bgm');
@@ -238,19 +285,19 @@ function showCake(){
     cakeGif.style.transform = "scale(1)";
   },100);
 
-  // ⏳ 8 秒後切換 Cake2.gif
+  // Cake1.gif 播放約 10 秒後切換 Cake2.gif
   setTimeout(()=>{
     cakeGif.style.opacity = 0;
     setTimeout(()=>{
-      cakeGif.src = "Cake2.gif"; // 換成第二張
+      cakeGif.src = "Cake2.gif";
       cakeGif.style.opacity = 1;
-    },1500);
-  },8000);
+    },800);
+  },10000);
 
-  // 25 秒後出現訊息和按鈕
+  // 15 秒後顯示訊息和按鈕
   setTimeout(()=>{
     document.getElementById("afterCake").style.display = "block";
-  },25000);
+  },15000);
 }
 
 // 🎉 按鈕互動
@@ -289,9 +336,9 @@ dislikeBtn.addEventListener("click",()=>{
     document.body.appendChild(e);
     setTimeout(()=>e.remove(),4000);
 
-    // 超過 6 次 → 跳出提示框
+    // 6 次 → 自訂提示框
     if(dislikeCount===6){
-      alert("這樣貝戈戈就是了？🥹\n後面還有東西欸☹️");
+      showCustomAlert("這樣貝戈戈就是了？🥹<br>後面還有東西欸☹️");
     }
   }
 });
@@ -300,6 +347,23 @@ likeBtn.addEventListener("click",()=>{
   emojiOverlay.textContent="🤪";
   emojiOverlay.style.opacity=1;
   emojiOverlay.style.display="block";
+});
+
+// ⛔ 自訂提示框
+const customAlertOverlay = document.getElementById("customAlertOverlay");
+const customAlertBox = document.getElementById("customAlertBox");
+const customAlertMsg = document.getElementById("customAlertMsg");
+const alertOk = document.getElementById("alertOk");
+
+function showCustomAlert(msg){
+  customAlertMsg.innerHTML = msg;
+  customAlertOverlay.style.display="flex";
+  setTimeout(()=> customAlertBox.classList.add("show"),50);
+}
+
+alertOk.addEventListener("click",()=>{
+  customAlertOverlay.style.display="none";
+  customAlertBox.classList.remove("show");
 });
 </script>
 </body>
