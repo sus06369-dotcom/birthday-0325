@@ -44,7 +44,7 @@
     overflow:hidden;
   }
 
-  /* 🔹 中文文字動畫（縮放更明顯，不會馬上消失） */
+  /* 🔹 中文文字動畫 */
   .message.text{
     font-size: clamp(28px, 7.5vw, 72px);
     animation: textZoomIn 2s forwards;
@@ -57,7 +57,7 @@
     100% { opacity:1; transform: scale(1); }
   }
 
-  /* 🔹 倒數數字維持原本縮放＋淡出 */
+  /* 🔹 倒數數字 */
   .message.number{
     font-size: clamp(64px, 28vw, 220px);
     animation: numberZoomFade 2s forwards;
@@ -87,6 +87,14 @@
     to { transform: translateY(110vh) translateX(var(--drift,0px)) rotate(720deg); }
   }
 
+  canvas#cakeCanvas {
+    display:none;
+    position:absolute;
+    left:50%;
+    top:55%;
+    transform:translate(-50%,-50%);
+  }
+
   @media (max-width:420px){
     .message.text{ font-size: clamp(20px, 8.5vw, 40px); }
     .message.number{ font-size: clamp(48px, 30vw, 160px); }
@@ -99,10 +107,10 @@
   <source src="blessing.mp3" type="audio/mpeg">
 </audio>
 
-<!-- 🎂 蛋糕畫布 -->
-<canvas id="cakeCanvas" width="500" height="400" style="display:none;position:absolute;left:50%;top:55%;transform:translate(-50%,-50%);"></canvas>
+<canvas id="cakeCanvas" width="500" height="400"></canvas>
 
 <script>
+/* ---------------- 音樂 ---------------- */
 const bgm = document.getElementById('bgm');
 const wantA = localStorage.getItem('bgmAllowed') === 'true';
 const wantB = localStorage.getItem('bgmPlaying') === 'true';
@@ -110,6 +118,7 @@ if (wantA || wantB) {
   bgm.play().catch(()=>{ console.log('bgm.play() 被阻擋'); });
 }
 
+/* ---------------- 倒數訊息 ---------------- */
 const messages = [
   "嘿～芝茉妲絲",
   "今天是屬於",
@@ -153,7 +162,7 @@ function showNext(){
 }
 showNext();
 
-// 🎉 彩屑
+/* ---------------- 彩屑 ---------------- */
 function createConfetti(){
   const c = document.createElement('div');
   c.className = 'confetti';
@@ -173,71 +182,55 @@ function createConfetti(){
 }
 setInterval(createConfetti, 120);
 
-// 🎂 改良版 showCake()：模擬 Turtle 慢慢畫出蛋糕
+/* ---------------- 蛋糕動畫 ---------------- */
 function showCake(){
   const canvas = document.getElementById("cakeCanvas");
   const ctx = canvas.getContext("2d");
   canvas.style.display = "block";
 
   ctx.lineWidth = 3;
-  ctx.strokeStyle = "#333";
-  ctx.fillStyle = "#fff";
-
-  function roundRect(x, y, w, h, r, color){
-    ctx.beginPath();
-    ctx.moveTo(x+r, y);
-    ctx.arcTo(x+w, y,   x+w, y+h, r);
-    ctx.arcTo(x+w, y+h, x,   y+h, r);
-    ctx.arcTo(x,   y+h, x,   y,   r);
-    ctx.arcTo(x,   y,   x+w, y,   r);
-    ctx.closePath();
-    ctx.fillStyle = color;
-    ctx.fill();
-    ctx.stroke();
-  }
+  ctx.lineCap = "round";
+  ctx.strokeStyle = "#000";
 
   let steps = [];
 
-  // 蛋糕底層
-  steps.push(()=> roundRect(100, 250, 300, 80, 40, "#fff0f3"));
-  steps.push(()=> roundRect(120, 220, 260, 60, 30, "#f2d7dd"));
+  // 盤子
+  steps.push(()=>{ ctx.beginPath(); ctx.ellipse(250, 350, 180, 30, 0, 0, Math.PI*2); ctx.stroke(); });
 
-  // 蛋糕上層
-  steps.push(()=> roundRect(150, 150, 200, 60, 30, "#ffe4e1"));
-  steps.push(()=> roundRect(170, 120, 160, 50, 25, "#ffc3be"));
+  // 蛋糕底層
+  steps.push(()=>{ ctx.fillStyle="#ffb6c1"; ctx.fillRect(120, 260, 260, 60); ctx.strokeRect(120, 260, 260, 60); });
+
+  // 上層
+  steps.push(()=>{ ctx.fillStyle="#ffe4b5"; ctx.fillRect(160, 200, 180, 60); ctx.strokeRect(160, 200, 180, 60); });
 
   // 蠟燭
-  const candleX = [180, 220, 250, 280, 320];
+  const candleX = [190, 230, 270, 310];
   candleX.forEach(x=>{
     steps.push(()=>{
-      ctx.fillStyle = "#87cefa";
-      ctx.fillRect(x, 90, 10, 40);
-      ctx.fillStyle = "white";
-      for(let i=0;i<5;i++){
-        ctx.fillRect(x, 90+i*8, 10, 2);
-      }
-      ctx.strokeRect(x, 90, 10, 40);
+      ctx.fillStyle="#87cefa";
+      ctx.fillRect(x, 150, 10, 50);
+      ctx.strokeRect(x, 150, 10, 50);
     });
   });
 
-  // 一步一步畫出來
+  // 蠟燭火焰動畫（最後）
+  function drawFlames(){
+    candleX.forEach(x=>{
+      ctx.beginPath();
+      ctx.ellipse(x+5, 140, 6, 10, 0, 0, Math.PI*2);
+      ctx.fillStyle = "rgba(255,165,0,"+(0.7+Math.random()*0.3)+")";
+      ctx.fill();
+    });
+  }
+
+  // 逐步繪製
   let i = 0;
   function drawStep(){
-    if(i < steps.length){
+    if (i < steps.length){
       steps[i]();
       i++;
-      setTimeout(drawStep, 500);
+      setTimeout(drawStep, 600);
     } else {
-      // 火焰動畫
-      function drawFlames(){
-        ctx.clearRect(0,0,canvas.width,90);
-        candleX.forEach(x=>{
-          ctx.beginPath();
-          ctx.ellipse(x+5, 80, 6, 10, 0, 0, Math.PI*2);
-          ctx.fillStyle = "rgba(255,165,0,"+(0.6+Math.random()*0.4)+")";
-          ctx.fill();
-        });
-      }
       setInterval(drawFlames, 200);
     }
   }
