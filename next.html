@@ -164,7 +164,72 @@ function createConfetti(){
   document.body.appendChild(c);
   setTimeout(()=> c.remove(), duration*1000 + 200);
 }
-setInterval(createConfetti, 120);
+  setInterval(createConfetti, 120);
+  <!-- 🎂 蛋糕畫布 -->
+<canvas id="cakeCanvas" width="500" height="400" style="display:none;position:absolute;left:50%;top:55%;transform:translate(-50%,-50%);"></canvas>
+
+<script>
+// 等倒數結束後再顯示蛋糕
+function showCake(){
+  const canvas = document.getElementById("cakeCanvas");
+  const ctx = canvas.getContext("2d");
+  canvas.style.display = "block";
+
+  // 畫圓角長方形（蛋糕層用）
+  function roundRect(x, y, w, h, r, color){
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.arcTo(x+w, y,   x+w, y+h, r);
+    ctx.arcTo(x+w, y+h, x,   y+h, r);
+    ctx.arcTo(x,   y+h, x,   y,   r);
+    ctx.arcTo(x,   y,   x+w, y,   r);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
+
+  // 畫蛋糕底層
+  roundRect(100, 250, 300, 80, 40, "#fff0f3");
+  roundRect(120, 220, 260, 60, 30, "#cbd9f9");
+
+  // 畫蛋糕上層
+  roundRect(150, 150, 200, 60, 30, "#ffe4e1");
+  roundRect(170, 120, 160, 50, 25, "#d08080");
+
+  // 畫蠟燭
+  const candleX = [180, 220, 250, 280, 320];
+  candleX.forEach(x=>{
+    ctx.fillStyle = "#87cefa"; // 蠟燭身
+    ctx.fillRect(x, 90, 10, 40);
+    ctx.fillStyle = "white";   // 蠟燭條紋
+    for(let i=0;i<5;i++){
+      ctx.fillRect(x, 90+i*8, 10, 2);
+    }
+  });
+
+  // 火焰動畫
+  function drawFlames(){
+    ctx.clearRect(0,0,canvas.width,90); // 只清除火焰區域
+    candleX.forEach(x=>{
+      ctx.beginPath();
+      ctx.ellipse(x+5, 80, 6, 10, 0, 0, Math.PI*2);
+      ctx.fillStyle = "rgba(255,165,0,"+(0.7+Math.random()*0.3)+")";
+      ctx.fill();
+    });
+  }
+  setInterval(drawFlames, 200);
+}
+
+// 修改 showNext() → 倒數結束後呼叫蛋糕
+const oldShowNext = showNext;
+showNext = function(){
+  if (idx >= messages.length){
+    showCake();
+    return;
+  }
+  oldShowNext();
+}
+</script>
 </script>
 </body>
 </html>
