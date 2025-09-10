@@ -287,23 +287,27 @@
       } else if (dislikeCount === 2) {
         // 🥹 掉落，部分旋轉
         for (let i = 0; i < 20; i++) {
+          const wrapper = document.createElement("div");
           const e = document.createElement("div");
           e.textContent = "🥹";
-          e.style.position = "fixed";
-          e.style.top = "-40px";
-          e.style.left = Math.random() * 100 + "vw";
           e.style.fontSize = "28px";
-          e.style.zIndex = 4;
+
+          wrapper.style.position = "fixed";
+          wrapper.style.top = "-40px";
+          wrapper.style.left = Math.random() * 100 + "vw";
+          wrapper.style.zIndex = 4;
 
           const duration = 3 + Math.random() * 2;
-          const spin = Math.random() > 0.5; // 隨機決定會不會旋轉
+          wrapper.style.animation = `fall-emoji ${duration}s linear forwards`;
 
-          e.style.animation = spin
-            ? fall-emoji ${duration}s linear forwards, spin ${duration}s linear infinite
-            : `fall-emoji ${duration}s linear forwards`;
+          if (Math.random() > 0.5) {
+            e.style.animation = `spin ${duration}s linear infinite`;
+          }
 
-          document.body.appendChild(e);
-          setTimeout(() => e.remove(), duration * 1000);
+          wrapper.appendChild(e);
+          document.body.appendChild(wrapper);
+
+          setTimeout(() => wrapper.remove(), duration * 1000);
         }
       } else if (dislikeCount >= 3) {
         modalText.innerText = "沒有其他話了🥹\n不要再給我點不喜歡了";
