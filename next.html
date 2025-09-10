@@ -25,7 +25,6 @@
     color:var(--fg);
   }
 
-  /* 主容器 */
   #main-container{
     position:relative;
     width:100%;
@@ -37,7 +36,7 @@
     text-align:center;
   }
 
-  /* 文字 slide (每段占滿畫面中心) */
+  /* 文字區 */
   .slide {
     position:fixed;
     inset:0;
@@ -50,33 +49,26 @@
   .msg {
     color:var(--fg);
     font-weight:700;
-    white-space:nowrap; /* 一行顯示 */
+    white-space:nowrap;
     transform: scale(.5);
     opacity:0;
     transition: transform .6s cubic-bezier(.2,.8,.2,1), opacity .4s;
   }
   .msg.show { transform: scale(1); opacity:1; }
+  .msg.count { font-size: clamp(72px, 24vw, 220px); }
+  .msg.normal { font-size: clamp(28px, 6.5vw, 72px); }
 
-  /* 倒數數字更大 */
-  .msg.count {
-    font-size: clamp(72px, 24vw, 220px); /* 大到佔滿但不超出 */
-  }
-  .msg.normal {
-    font-size: clamp(28px, 6.5vw, 72px);
-  }
-
-  /* 蛋糕區：置中但稍微靠上 */
+  /* 蛋糕區 */
   #cake-area{
     position:relative;
     width:100%;
     display:flex;
     justify-content:center;
-    align-items:flex-start; /* 垂直往上靠中上 */
+    align-items:flex-start;
     margin-top:6vh;
     z-index:3;
     pointer-events:none;
   }
-  /* video & gif 同樣框、置中、上半部 */
   .cake-media{
     width: min(560px, 80%);
     max-width:80%;
@@ -88,7 +80,7 @@
   }
   .cake-media.visible { opacity:1; transform: scale(1); }
 
-  /* 生日文字與按鈕區 (在蛋糕下方) */
+  /* 生日文字與按鈕 */
   #afterCake{
     margin-top:18px;
     text-align:center;
@@ -99,7 +91,6 @@
     align-items:center;
     gap:12px;
   }
-
   .celebrate {
     color:var(--fg);
     font-weight:700;
@@ -111,7 +102,6 @@
   }
   .celebrate.show { transform: scale(1); opacity:1; }
 
-  /* 按鈕，左右淡入 */
   #buttons {
     display:flex;
     gap:16px;
@@ -134,15 +124,13 @@
   .btn.like { background:var(--like); color:#3b2b1a; }
   .btn.dislike { background:var(--dislike); color:#04304a; }
   .btn:hover { transform: scale(1.06); box-shadow: 0 6px 18px rgba(0,0,0,0.15); }
-
-  /* 左右淡入 (we'll animate with classes) */
   .btn.hidden { opacity:0; transform: translateX(0); }
   .btn.left-in { animation: leftIn .7s forwards; }
   .btn.right-in { animation: rightIn .7s forwards; }
   @keyframes leftIn { from { opacity:0; transform: translateX(-30px);} to {opacity:1; transform: translateX(0);} }
   @keyframes rightIn{ from { opacity:0; transform: translateX(30px);} to {opacity:1; transform: translateX(0);} }
 
-  /* emoji overlay (顯示 🥺 ) */
+  /* emoji */
   #emojiOverlay{
     position:fixed;
     top:45%;
@@ -156,7 +144,6 @@
   }
   #emojiOverlay.show{ opacity:1; transform: translate(-50%,-50%) scale(1); }
 
-  /* emoji 掉落 (小顆) */
   .emoji-fall{
     position:fixed;
     top:-40px;
@@ -167,7 +154,7 @@
   }
   @keyframes emojiFall { to { transform: translateY(110vh) rotate(360deg); opacity:0.9; } }
 
-  /* modal（和第一頁視覺一樣，但按鈕改成「關閉」） */
+  /* modal */
   .modal {
     display:none;
     position: fixed;
@@ -197,10 +184,8 @@
     font-weight:700;
   }
 
-  /* 保留區塊（將來擴充使用） */
-  #future-area { display:none; } /* 之後點 likeBtn 可顯示或注入內容 */
+  #future-area { display:none; }
 
-  /* 響應式微調 */
   @media (max-width:420px){
     .celebrate{ font-size: clamp(22px, 7vw, 36px); }
     .msg.normal{ font-size: clamp(20px, 7.5vw, 40px); }
@@ -212,16 +197,11 @@
 </head>
 <body>
   <div id="main-container">
-    <!-- 文字展示區（每段會產生一個 .slide） -->
-    <!-- cake area -->
     <div id="cake-area">
-      <!-- 影片用 webm（Cake1.webm）: autoplay 但播放可能被瀏覽器阻擋，會在第一頁互動後允許播放 -->
       <video id="cakeVideo" class="cake-media" playsinline webkit-playsinline muted></video>
-      <!-- GIF（Cake2.gif）先 preload（隱藏）-->
       <img id="cakeGif" class="cake-media" src="" alt="cake gif" style="display:none;" />
     </div>
 
-    <!-- 下方文字與按鈕（預設隱藏，等蛋糕出現後觸發） -->
     <div id="afterCake" style="display:none;">
       <div id="celebrateText" class="celebrate">お誕生日おめでとう 🎂</div>
       <div id="buttons" aria-hidden="true">
@@ -230,10 +210,8 @@
       </div>
     </div>
 
-    <!-- emoji overlay -->
     <div id="emojiOverlay">🥺</div>
 
-    <!-- modal（提示框） -->
     <div id="modal" class="modal" role="dialog" aria-modal="true">
       <div class="modal-content">
         <div id="modalText">提示文字</div>
@@ -241,21 +219,12 @@
       </div>
     </div>
 
-    <!-- 保留未來擴充區 -->
     <div id="future-area"></div>
   </div>
 
-  <!-- 背景音樂 -->
-  <audio id="bgm" src="blessing.mp3" loop></audio>
+  <audio id="bgm" src="" loop></audio>
 
 <script>
-/* ================================================================
-   參數、檔名（請確保檔案已上傳至你 GitHub repo）
-   - Cake1.webm (影片，一次播放)
-   - Cake2.gif  (蠟燭持續動的 GIF)
-   - blessing.mp3
-   ================================================================ */
-
 const COUNT_MESSAGES = [
   "嘿～芝茉妲絲",
   "今天是屬於",
@@ -272,7 +241,6 @@ const VIDEO_SRC = "Cake1.webm";
 const GIF_SRC   = "Cake2.gif";
 const BGM_SRC   = "blessing.mp3";
 
-/* 元件 */
 const main = document.getElementById('main-container');
 const bgm = document.getElementById('bgm');
 const cakeVideo = document.getElementById('cakeVideo');
@@ -290,8 +258,8 @@ const futureArea = document.getElementById('future-area');
 
 let dislikeCount = 0;
 
-/* === 背景音樂：若第一頁有設定 bgmAllowed 就播放（若被阻擋可在互動時播放） === */
 function tryPlayBGM(){
+  bgm.src = BGM_SRC; // 修正：確保音樂來源正確
   if (localStorage.getItem('bgmAllowed') === 'true') {
     bgm.play().catch(()=> {
       console.log('bgm.play() 被阻擋（瀏覽器限制）');
@@ -299,22 +267,16 @@ function tryPlayBGM(){
   }
 }
 
-/* === 彩屑（簡單版、平均撒落） === */
 function launchConfetti(){
-  // 持續建立彩屑元素並掉落
   setInterval(() => {
     const el = document.createElement('div');
     el.className = 'confetti';
-    // size
     const size = Math.random()*14 + 6;
     el.style.width = size + 'px';
     el.style.height = size + 'px';
-    // position
     el.style.left = (Math.random()*100) + 'vw';
-    // color (挑出協調的色彩)
     const colors = ["#ffd500","#ff9ac2","#bfe6ff","#d9b4ff","#ff8fa3","#ffffff"];
     el.style.background = colors[Math.floor(Math.random()*colors.length)];
-    // duration
     const dur = Math.random()*3 + 2;
     el.style.animationDuration = dur + 's';
     document.body.appendChild(el);
@@ -322,50 +284,84 @@ function launchConfetti(){
   }, 140);
 }
 
-/* === 文字序列顯示 === */
 function startSequence(){
   let idx = 0;
   function showOne(){
     if (idx >= COUNT_MESSAGES.length) {
-      // 完成文字序列 -> 顯示蛋糕
       showCakeSequence();
       return;
     }
     const slide = document.createElement('div');
     slide.className = 'slide';
     const msg = document.createElement('div');
-    // 321 為數字 (最後三個項目)
     const isNumber = !isNaN(COUNT_MESSAGES[idx]);
     msg.className = 'msg ' + (isNumber ? 'count' : 'normal');
     msg.textContent = COUNT_MESSAGES[idx];
     slide.appendChild(msg);
     document.body.appendChild(slide);
-    // force reflow then show
+
     requestAnimationFrame(()=> msg.classList.add('show'));
-    // 顯示時間：數字稍長些
     const dur = isNumber ? 1800 : 1500;
+
     setTimeout(()=>{
-      // 消失
       msg.classList.remove('show');
-      setTimeout(()=> { slide.remove(); idx++; showOne(); }, 300);
+      setTimeout(()=> { 
+        if (slide && slide.parentNode) {
+          slide.parentNode.removeChild(slide); // 修正：避免 remove() 相容性問題
+        }
+        idx++; 
+        showOne(); 
+      }, 300);
     }, dur);
   }
   showOne();
 }
 
-/* === 蛋糕呈現：先播放 video（一次），播放完切換成 gif（不閃爍） === */
 function showCakeSequence(){
-  // preload gif silently
   const gifPre = new Image();
   gifPre.src = GIF_SRC;
-  // 設定 video src 並嘗試播放
   cakeVideo.src = VIDEO_SRC;
   cakeGif.src = GIF_SRC;
-  // 先確保 cakeGif hidden, cakeVideo visible
   cakeGif.style.display = 'none';
   cakeVideo.style.display = 'block';
-  // 預設暫時 muted，以避免自動播放限制（bgm 分開）
-  // 嘗試播放（若被阻擋會在互動時再觸發）
   cakeVideo.play().catch(()=> { console.log('video autoplay 被阻擋'); });
+  setTimeout(()=> cakeVideo.classList.add('visible'), 120);
 
-  //
+  cakeVideo.addEventListener('ended', () => {
+    cakeGif.style.display = 'block';
+    setTimeout(()=> cakeGif.classList.add('visible'), 30);
+    cakeVideo.classList.remove('visible');
+    setTimeout(()=> {
+      cakeVideo.style.display = 'none';
+      setTimeout(()=> { showCelebrateAndButtons(); }, 350);
+    }, 500);
+  });
+
+  cakeVideo.addEventListener('error', () => {
+    cakeVideo.style.display = 'none';
+    cakeVideo.classList.remove('visible');
+    cakeGif.style.display = 'block';
+    setTimeout(()=> cakeGif.classList.add('visible'), 80);
+    setTimeout(()=> showCelebrateAndButtons(), 400);
+  });
+}
+
+function showCelebrateAndButtons(){
+  afterCake.style.display = 'block';
+  setTimeout(()=> { celebrateText.classList.add('show'); }, 120);
+  setTimeout(()=> {
+    buttons.style.opacity = 1;
+    likeBtn.classList.add('left-in');
+    dislikeBtn.classList.add('right-in');
+    buttons.setAttribute('aria-hidden','false');
+  }, 1200);
+}
+
+function onDislike(){
+  dislikeCount++;
+  likeBtn.style.transform = `scale(${1 + dislikeCount*0.18})`;
+
+  if (dislikeCount === 1){
+    emojiOverlay.textContent = '🥺';
+    emojiOverlay.classList.add('show');
+  }
