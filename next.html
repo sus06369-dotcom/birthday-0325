@@ -24,7 +24,7 @@ body {
   color:var(--fg);
 }
 
-/* 全螢幕文字 */
+/* 全螢幕置中文字 */
 .slide {
   position:fixed;
   inset:0;
@@ -43,8 +43,10 @@ body {
 }
 .msg.show { opacity:1; transform: scale(1); }
 .msg.hide { opacity:0; transform: scale(.8); }
-.msg.normal { font-size: clamp(32px, 7vw, 80px); }
-.msg.count { font-size: clamp(72px, 20vw, 220px); }
+
+/* 🚀 把字體變大 */
+.msg.normal { font-size: clamp(36px, 8vw, 88px); }
+.msg.count { font-size: clamp(88px, 22vw, 260px); }
 
 /* 蛋糕區 */
 #cake-area {
@@ -73,7 +75,7 @@ body {
 .celebrate {
   font-weight:700;
   color:var(--fg);
-  font-size: clamp(36px, 7vw, 64px);
+  font-size: clamp(32px, 6vw, 56px);
   white-space:nowrap;
   opacity:0;
   transform:scale(.6);
@@ -144,37 +146,25 @@ body {
 .modal.show { display:flex; }
 .modal-content {
   background:white;
-  padding:20px 26px;
-  border-radius:10px;
+  padding:30px 40px;   /* 提示框更大 */
+  border-radius:12px;
   font-weight:700;
   text-align:center;
+  font-size: 1.4em;    /* 文字大一點 */
+  max-width: 80%;      /* 限制寬度 */
 }
 .modal-content button {
-  margin-top:12px;
-  background:var(--like);
+  margin-top:16px;
+  background: var(--fg);  /* 紫色背景 */
+  color: white;           /* 白字 */
   border:none;
-  padding:8px 14px;
+  padding:10px 20px;      /* 大一點的按鈕 */
   border-radius:8px;
   font-weight:700;
   cursor:pointer;
 }
 
-/* 彩屑 */
-.confetti {
-  position:fixed;
-  top:-10px;
-  width:10px;
-  height:10px;
-  background-color: red;
-  opacity:0.8;
-  z-index:6;
-  animation: confettiFall linear forwards;
-}
-@keyframes confettiFall {
-  to { transform:translateY(110vh) rotate(720deg); opacity:0; }
-}
-
-/* 後續 */
+/* 保留區塊 */
 #future-area { display:none; }
 </style>
 </head>
@@ -235,7 +225,7 @@ const bgm=document.getElementById("bgm");
 
 let dislikeCount=0;
 
-/* === 依序文字 === */
+/* === 流程：一段文字一段顯示 === */
 function startSequence(){
   let idx=0;
   function showOne(){
@@ -260,7 +250,7 @@ function startSequence(){
   showOne();
 }
 
-/* === 蛋糕 === */
+/* === 蛋糕流程 === */
 function showCake(){
   cakeVideo.src=VIDEO_SRC;
   cakeGif.src=GIF_SRC;
@@ -283,7 +273,7 @@ function showCelebrate(){
     buttons.style.opacity=1;
     likeBtn.classList.add("left-in");
     dislikeBtn.classList.add("right-in");
-  },1200);
+  },1000);
 }
 
 /* === 不喜歡互動 === */
@@ -328,24 +318,10 @@ likeBtn.onclick=()=>{
   newArea.innerHTML="<div style='font-weight:700;color:var(--fg);'>（這裡是後續互動區塊）</div>";
 };
 
-/* === 彩屑 === */
-function createConfetti(){
-  const colors=["#ff7675","#74b9ff","#ffeaa7","#55efc4","#fd79a8","#a29bfe"];
-  const confetti=document.createElement("div");
-  confetti.className="confetti";
-  confetti.style.backgroundColor=colors[Math.floor(Math.random()*colors.length)];
-  confetti.style.left=Math.random()*100+"vw";
-  confetti.style.width=confetti.style.height=(6+Math.random()*8)+"px";
-  confetti.style.animationDuration=(3+Math.random()*3)+"s";
-  document.body.appendChild(confetti);
-  setTimeout(()=>confetti.remove(),6000);
-}
-
 /* 啟動 */
 window.onload=()=>{
   try{bgm.play().catch(()=>{});}catch(e){}
   startSequence();
-  setInterval(createConfetti,200); // 彩屑密度
 };
 </script>
 </body>
