@@ -1,10 +1,10 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Surprise 🎉</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@700&display=swap" rel="stylesheet">
 
   <style>
     body {
@@ -27,25 +27,21 @@
 
     /* 縮放文字動畫 */
     .message {
-      font-size: 2.5em;
-      font-weight: bold; /* ✅ 粗體 */
-      color: #4b0082;
-      opacity: 0;
-      transform: scale(0.5);
-      animation: zoomIn 1s forwards;
-      white-space: pre-line;
-    }
-
-    /* 倒數 321 特大字 */
-    .countdown {
-      font-size: 6em;  /* ✅ 更大，幾乎滿版 */
+      font-size: 2.8em;
       font-weight: bold;
       color: #4b0082;
       opacity: 0;
       transform: scale(0.5);
       animation: zoomIn 1s forwards;
     }
-
+    .countdown {
+      font-size: 5em; /* 倒數更大 */
+      font-weight: bold;
+      color: #4b0082;
+      opacity: 0;
+      transform: scale(0.5);
+      animation: zoomIn 1s forwards;
+    }
     @keyframes zoomIn {
       to {
         opacity: 1;
@@ -54,15 +50,24 @@
     }
 
     /* 蛋糕影片 / GIF */
+    .cake-container {
+      position: relative;
+      width: 100%;
+      height: 60vh; /* 蛋糕區塊靠上 */
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
     .cake {
-      max-width: 80%;
+      max-width: 70%;
+      position: absolute;
+      top: 0;
       display: none;
-      margin-top: 20px;
     }
 
-    /* 生日快樂文字 */
+    /* 祝賀文字 */
     .celebrate-text {
-      font-size: 3em;   /* ✅ 比普通訊息大一點 */
+      font-size: 3em;
       font-weight: bold;
       color: #4b0082;
       margin-top: 20px;
@@ -81,22 +86,22 @@
     #likeBtn {
       padding: 12px 25px;
       font-size: 1.2em;
-      background: #ffb347; /* ✅ 溫和橘色 */
+      background: #ffb347; /* 溫和橘色 */
       color: white;
       border: none;
       border-radius: 15px;
       cursor: pointer;
-      transition: transform 0.2s;
+      transition: transform 0.2s, opacity 0.5s;
     }
     #dislikeBtn {
       padding: 12px 25px;
       font-size: 1.2em;
-      background: #87ceeb; /* ✅ 溫和藍色 */
+      background: #6ec6ff; /* 溫和藍色 */
       color: white;
       border: none;
       border-radius: 15px;
       cursor: pointer;
-      transition: transform 0.2s;
+      transition: transform 0.2s, opacity 0.5s;
     }
     button:hover {
       transform: scale(1.1);
@@ -118,45 +123,19 @@
         opacity: 0;
       }
     }
-
-    /* 提示框 */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5);
-      justify-content: center;
-      align-items: center;
-    }
-    .modal-content {
-      background: white;
-      padding: 20px 30px;
-      border-radius: 10px;
-      text-align: center;
-      font-size: 1.2em;
-      color: #4b0082;
-      box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
-    }
-    .modal-content button {
-      margin-top: 15px;
-      background: #a78bfa;
-      padding: 8px 16px;
-      border: none;
-      border-radius: 8px;
-      color: white;
-      cursor: pointer;
-    }
   </style>
 </head>
 <body>
   <div class="container" id="main-container">
     <div id="text-container"></div>
 
-    <video id="cakeVideo" class="cake" autoplay muted playsinline>
-      <source src="Cake1.webm" type="video/webm">
-    </video>
-    <img id="cakeGif" class="cake" src="Cake2.gif" alt="Cake">
+    <!-- 蛋糕區塊 -->
+    <div class="cake-container">
+      <video id="cakeVideo" class="cake" autoplay muted playsinline>
+        <source src="Cake1.webm" type="video/webm">
+      </video>
+      <img id="cakeGif" class="cake" src="Cake2.gif" alt="Cake">
+    </div>
 
     <div id="celebrate" style="display: none;">
       <div class="celebrate-text">お誕生日おめでとう 🎂</div>
@@ -167,17 +146,10 @@
     </div>
   </div>
 
-  <div id="dislikeModal" class="modal">
-    <div class="modal-content">
-      <p>沒有其他話了🥹<br>不要再給我點不喜歡了</p>
-      <button onclick="closeDislikeModal()">關閉</button>
-    </div>
-  </div>
-
   <audio id="bgm" src="blessing.mp3" loop></audio>
 
   <script>
-    // ✅ 進入頁面自動播放背景音樂（第一頁已互動過）
+    // ✅ 進入頁面自動播放背景音樂
     window.addEventListener("load", () => {
       const bgm = document.getElementById("bgm");
       if (localStorage.getItem("bgmAllowed") === "true") {
@@ -207,11 +179,9 @@
       function showNext() {
         if (i < messages.length) {
           const msg = document.createElement("div");
-          if (["3","2","1"].includes(messages[i])) {
-            msg.className = "countdown"; // ✅ 特大字樣式
-          } else {
-            msg.className = "message";
-          }
+          msg.className = (messages[i] === "3" || messages[i] === "2" || messages[i] === "1") 
+            ? "countdown" 
+            : "message";
           msg.textContent = messages[i];
           container.innerHTML = "";
           container.appendChild(msg);
@@ -228,12 +198,14 @@
       const container = document.getElementById("text-container");
       container.innerHTML = "";
       const cakeVideo = document.getElementById("cakeVideo");
-      cakeVideo.style.display = "block";
+      const cakeGif = document.getElementById("cakeGif");
+
+      cakeGif.style.display = "block"; // 先放 GIF 在下面
+      cakeVideo.style.display = "block"; // 播放影片覆蓋上去
       cakeVideo.play();
 
       cakeVideo.onended = () => {
-        cakeVideo.style.display = "none";
-        document.getElementById("cakeGif").style.display = "block";
+        cakeVideo.style.display = "none"; // 移除影片 → GIF 無縫呈現
         document.getElementById("celebrate").style.display = "block";
       };
     }
@@ -254,20 +226,6 @@
 
         setTimeout(() => confetti.remove(), 5000);
       }, 200);
-    }
-
-    // ❌ 不喜歡按鈕 → 三次後跳提示框
-    let dislikeCount = 0;
-    document.getElementById("dislikeBtn").addEventListener("click", () => {
-      dislikeCount++;
-      if (dislikeCount >= 3) {
-        document.getElementById("dislikeModal").style.display = "flex";
-        dislikeCount = 0; // 重置
-      }
-    });
-
-    function closeDislikeModal() {
-      document.getElementById("dislikeModal").style.display = "none";
     }
   </script>
 </body>
