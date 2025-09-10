@@ -15,7 +15,7 @@
   --bgB: #fbc2eb;
   --like: #ffb86b;
   --dislike: #7fb3ff;
-  --closeBtn: #8a2be2; /* 紫色關閉按鈕 */
+  --closeBtn: #ff7f50; /* 改成和第一頁相同色彩 */
 }
 html, body { height:100%; margin:0; padding:0; }
 body {
@@ -127,10 +127,15 @@ body {
   position:fixed;
   top:-40px;
   font-size:28px;
-  animation:fall linear forwards;
+  animation:emojiFall linear forwards;
   z-index:4;
 }
-@keyframes fall { to { transform:translateY(110vh); opacity:0; } }
+@keyframes emojiFall {
+  to {
+    transform:translateY(110vh) rotate(720deg);
+    opacity:0;
+  }
+}
 
 /* 彩屑 */
 .confetti {
@@ -160,21 +165,21 @@ body {
 .modal.show { display:flex; }
 .modal-content {
   background:white;
-  padding:32px 40px; /* 放大內容區 */
-  border-radius:12px;
+  padding:48px 60px; /* 放大內容區 */
+  border-radius:14px;
   font-weight:700;
   text-align:center;
-  font-size:1.3em; /* 放大字體 */
+  font-size:1.6em; /* 放大字體 */
 }
 .modal-content button {
-  margin-top:16px;
+  margin-top:20px;
   background:var(--closeBtn);
   color:white;
   border:none;
-  padding:14px 22px; /* 放大按鈕 */
-  border-radius:10px;
+  padding:14px 28px;
+  border-radius:12px;
   font-weight:700;
-  font-size:1.1em; /* 放大文字 */
+  font-size:1.1em;
   cursor:pointer;
 }
 
@@ -189,7 +194,7 @@ body {
     <img id="cakeGif" class="cake-media" alt="cake gif" />
   </div>
   <div id="afterCake">
-    <div id="celebrateText" class="celebrate">お誕生日おめでとう 🎂</div>
+    <div id="celebrateText" class="celebrate">お誕生日おめでとう</div>
     <div id="buttons">
       <button id="likeBtn" class="btn like">我很喜歡</button>
       <button id="dislikeBtn" class="btn dislike">我不喜歡</button>
@@ -290,7 +295,7 @@ function showCelebrate(){
   },1000);
 }
 
-/* === 彩屑（只保留正方形） === */
+/* === 彩屑 === */
 function launchConfetti(){
   setInterval(()=>{
     const confetti=document.createElement("div");
@@ -317,22 +322,27 @@ dislikeBtn.onclick=()=>{
     emojiOverlay.textContent="🥺";
     emojiOverlay.classList.add("show");
     setTimeout(()=>emojiOverlay.classList.remove("show"),1500);
+
   }else if(dislikeCount===2){
-    for(let i=0;i<10;i++){
+    // 🥹 掉落數量更多 & 隨機旋轉 & 大小不同
+    for(let i=0;i<20;i++){
       const e=document.createElement("div");
       e.className="emoji-fall";
       e.textContent="🥹";
       e.style.left=(Math.random()*90)+"vw";
       e.style.animationDuration=(2+Math.random()*3)+"s";
+      e.style.fontSize=(24+Math.random()*14)+"px";
       document.body.appendChild(e);
       setTimeout(()=>e.remove(),5000);
     }
+
   }else if(dislikeCount>=3){
     let text="";
     if(dislikeCount===3) text="你忍心嗎？🥺";
     else if(dislikeCount===4) text="不要開玩笑啦…🥺";
     else if(dislikeCount===5) text="你再點我都快碎掉了🥹";
-    else text="好了，已經傷心了都\n沒有其他話了🥹\n不要再給我點不喜歡了";
+    else if(dislikeCount===6) text="好了，已經傷心了都\n沒有其他話了🥹\n不要再給我點不喜歡了";
+    else text="沒了啦！還點！";
     modalText.innerText=text;
     modal.classList.add("show");
   }
