@@ -1,264 +1,144 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="ja">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>生日小驚喜 Part 2</title>
+  <meta charset="UTF-8">
+  <title>Happy Birthday</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Arial", sans-serif;
+      background: #000;
+      color: #fff;
+      overflow: hidden;
+    }
 
-<!-- Google Font -->
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@700&display=swap" rel="stylesheet">
+    .page {
+      display: none;
+      text-align: center;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
 
-<style>
-  :root{
-    --fg:#4b0082;
-    --bgA:#d8b4fe;
-    --bgB:#fbc2eb;
-  }
+    .active {
+      display: flex;
+    }
 
-  html,body{height:100%;margin:0;padding:0;}
-  body{
-    min-height:100vh;
-    background: linear-gradient(to right, var(--bgA), var(--bgB));
-    font-family: 'Noto Sans TC', sans-serif;
-    overflow:hidden;
-    color:var(--fg);
-    position:relative;
-  }
+    /* 第一頁按鈕 */
+    #startBtn {
+      padding: 10px 20px;
+      font-size: 18px;
+      cursor: pointer;
+    }
 
-  .slide{
-    position:fixed;
-    inset:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    pointer-events:none;
-  }
+    /* 第二頁內容 */
+    #cake1, #cake2 {
+      max-width: 300px;
+      margin: 0 auto;
+      display: block;
+    }
 
-  .message{
-    text-align:center;
-    max-width:90%;
-    padding:0 12px;
-    color:var(--fg);
-    font-weight:700;
-    white-space: nowrap;
-    overflow:hidden;
-  }
+    #cake2, #message, #buttons {
+      display: none;
+    }
 
-  .message.text{
-    font-size: clamp(28px, 7.5vw, 72px);
-    animation: textZoomIn 2s forwards;
-  }
+    /* 文字縮放動畫 */
+    .zoom-in {
+      animation: zoomIn 1s forwards;
+    }
+    @keyframes zoomIn {
+      from { transform: scale(0); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
 
-  @keyframes textZoomIn{
-    0%   { opacity:0; transform: scale(0.5); }
-    25%  { opacity:1; transform: scale(1.25); }
-    55%  { opacity:1; transform: scale(1); }
-    100% { opacity:1; transform: scale(1); }
-  }
+    /* 按鈕區塊：水平對齊置中 */
+    #buttons {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 20px;
+    }
 
-  .message.number{
-    font-size: clamp(64px, 28vw, 220px);
-    animation: numberZoomFade 2s forwards;
-  }
+    #buttons button {
+      padding: 10px 20px;
+      font-size: 18px;
+      cursor: pointer;
+    }
 
-  @keyframes numberZoomFade{
-    0%   { opacity:0; transform: scale(0.5); }
-    25%  { opacity:1; transform: scale(1.25); }
-    55%  { opacity:1; transform: scale(1); }
-    90%  { opacity:1; transform: scale(1); }
-    100% { opacity:0; transform: scale(1); }
-  }
+    /* 左按鈕淡入 */
+    .fade-in-left {
+      animation: fadeInLeft 1s forwards;
+    }
+    @keyframes fadeInLeft {
+      from { opacity: 0; transform: translateX(-50px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
 
-  .confetti{
-    position: fixed;
-    top: -18px;
-    width:10px; height:10px;
-    border-radius:3px;
-    opacity:0.95;
-    z-index: 5;
-    pointer-events:none;
-    will-change: transform;
-    animation: confettiFall linear forwards;
-  }
-
-  @keyframes confettiFall{
-    to { transform: translateY(110vh) translateX(var(--drift,0px)) rotate(720deg); }
-  }
-
-  /* 🎂 蛋糕區塊 */
-  #cakeWrapper{
-    display:none;
-    text-align:center;
-    margin-top:40px;
-  }
-  #cake1, #cake2{
-    width:320px;
-    max-width:85%;
-    display:none;
-    margin:auto;
-  }
-
-  /* 🎉 お誕生日おめでとう */
-  #birthdayText{
-    display:none;
-    text-align:center;
-    margin-top:20px;
-    font-size: clamp(32px, 7vw, 72px);
-    font-weight:bold;
-    animation: textZoomIn 2s forwards;
-  }
-
-  /* 🎉 按鈕區 */
-  #buttons{
-    display:none;
-    margin-top:20px;
-    text-align:center;
-  }
-  button{
-    font-size:20px;
-    padding:10px 20px;
-    margin:0 15px;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-    opacity:0;
-    transition: all 1s ease;
-  }
-  #likeBtn{
-    background:#ffb6c1;
-    transform: translateX(-50px);
-  }
-  #dislikeBtn{
-    background:#87ceeb;
-    transform: translateX(50px);
-  }
-  #likeBtn.show{
-    opacity:1;
-    transform: translateX(0);
-  }
-  #dislikeBtn.show{
-    opacity:1;
-    transform: translateX(0);
-  }
-</style>
+    /* 右按鈕淡入 */
+    .fade-in-right {
+      animation: fadeInRight 1s forwards;
+    }
+    @keyframes fadeInRight {
+      from { opacity: 0; transform: translateX(50px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+  </style>
 </head>
 <body>
+  <!-- 第一頁 -->
+  <div class="page active" id="page1">
+    <h1>🎉 Happy Birthday 🎉</h1>
+    <button id="startBtn">開始</button>
+  </div>
 
-<audio id="bgm" autoplay loop>
-  <source src="blessing.mp3" type="audio/mpeg">
-</audio>
+  <!-- 第二頁 -->
+  <div class="page" id="page2">
+    <div id="confetti"></div>
 
-<!-- 🎂 蛋糕 -->
-<div id="cakeWrapper">
-  <video id="cake1" src="Cake1.webm" autoplay></video>
-  <img id="cake2" src="Cake2.gif" />
-</div>
+    <!-- Cake1: 播放一次的影片 -->
+    <video id="cake1" autoplay muted playsinline>
+      <source src="Cake1.webm" type="video/webm">
+      您的瀏覽器不支援 video 標籤。
+    </video>
 
-<!-- 🎉 文字 & 按鈕 -->
-<div id="birthdayText">お誕生日おめでとう</div>
-<div id="buttons">
-  <button id="likeBtn">我很喜歡</button>
-  <button id="dislikeBtn">我不喜歡</button>
-</div>
+    <!-- Cake2: 動態 GIF（蠟燭持續動） -->
+    <img id="cake2" src="cake2.gif" alt="Cake2">
 
-<script>
-const bgm = document.getElementById('bgm');
-const wantA = localStorage.getItem('bgmAllowed') === 'true';
-const wantB = localStorage.getItem('bgmPlaying') === 'true';
-if (wantA || wantB) {
-  bgm.play().catch(()=>{ console.log('bgm.play() 被阻擋'); });
-}
+    <!-- 文字 -->
+    <div id="message">お誕生日おめでとう</div>
 
-const messages = [
-  "嘿～芝茉妲絲",
-  "今天是屬於",
-  "🫵🏻🫵🏻你🫵🏻🫵🏻",
-  "特別日子！！！",
-  "準備好了嗎？🧐",
-  "就算還沒👀",
-  "也給我準備好😎",
-  "不等你的🥳",
-  "5","4","3","2","1"
-];
+    <!-- 按鈕區塊 -->
+    <div id="buttons">
+      <button id="likeBtn">我很喜歡</button>
+      <button id="dislikeBtn">我不喜歡</button>
+    </div>
+  </div>
 
-let idx = 0;
-const DURATION_NORMAL = 2000;
-const DURATION_NUMBER = 2000;
+  <script>
+    // 切換到第二頁
+    document.getElementById("startBtn").addEventListener("click", function () {
+      document.getElementById("page1").classList.remove("active");
+      document.getElementById("page2").classList.add("active");
+    });
 
-function showNext(){
-  if (idx >= messages.length) return;
-  const txt = messages[idx];
-  const isNumber = !isNaN(txt);
+    // Cake1 播放完 → 切換顯示 Cake2 + 文字縮放 + 按鈕淡入
+    document.getElementById("cake1").addEventListener("ended", function () {
+      this.style.display = "none"; // 隱藏 Cake1
 
-  const slide = document.createElement('div');
-  slide.className = 'slide';
+      let cake2 = document.getElementById("cake2");
+      cake2.style.display = "block"; // 顯示 Cake2
 
-  const msg = document.createElement('div');
-  msg.className = 'message ' + (isNumber ? 'number' : 'text');
-  msg.textContent = txt;
+      let msg = document.getElementById("message");
+      msg.style.display = "block"; // 顯示文字
+      msg.classList.add("zoom-in");
 
-  slide.appendChild(msg);
-  document.body.appendChild(slide);
-
-  const dur = isNumber ? DURATION_NUMBER : DURATION_NORMAL;
-  setTimeout(()=> {
-    slide.remove();
-    idx++;
-    showNext();
-    if(idx === messages.length){ showCake(); }
-  }, dur);
-}
-showNext();
-
-function createConfetti(){
-  const c = document.createElement('div');
-  c.className = 'confetti';
-  const colors = ["#ffd500","#ff69b4","#00bfff","#7cfc00","#ff4500","#ffffff"];
-  c.style.background = colors[Math.floor(Math.random()*colors.length)];
-  c.style.left = Math.random() * window.innerWidth + 'px';
-  const size = Math.random() * 14 + 6;
-  c.style.width = size + 'px';
-  c.style.height = size + 'px';
-  const drift = (Math.random()*260 - 130) + 'px';
-  c.style.setProperty('--drift', drift);
-  const duration = Math.random()*3 + 2;
-  c.style.animationDuration = duration + 's';
-  document.body.appendChild(c);
-  setTimeout(()=> c.remove(), duration*1000 + 200);
-}
-setInterval(createConfetti, 120);
-
-// 🎂 顯示蛋糕
-function showCake(){
-  const cakeWrapper = document.getElementById("cakeWrapper");
-  const cake1 = document.getElementById("cake1");
-  const cake2 = document.getElementById("cake2");
-  cakeWrapper.style.display = "block";
-  cake1.style.display = "block";
-
-  cake1.onended = ()=>{
-    cake1.style.display = "none";
-    cake2.style.display = "block";
-
-    // 🎉 蛋糕切換後 立即顯示「お誕生日おめでとう」
-    setTimeout(()=>{
-      const text = document.getElementById("birthdayText");
-      text.style.display = "block";
-    },200);
-
-    // 🎉 再顯示按鈕（淡入，左右進場）
-    setTimeout(()=>{
-      const buttons = document.getElementById("buttons");
-      const likeBtn = document.getElementById("likeBtn");
-      const dislikeBtn = document.getElementById("dislikeBtn");
-      buttons.style.display="block";
-      setTimeout(()=>{
-        likeBtn.classList.add("show");
-        dislikeBtn.classList.add("show");
-      },50);
-    },2000);
-  }
-}
-</script>
+      let buttons = document.getElementById("buttons");
+      buttons.style.display = "flex"; // 顯示按鈕
+      document.getElementById("likeBtn").classList.add("fade-in-left");
+      document.getElementById("dislikeBtn").classList.add("fade-in-right");
+    });
+  </script>
 </body>
 </html>
