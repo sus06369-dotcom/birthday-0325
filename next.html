@@ -291,29 +291,21 @@ function showCelebrate(){
 }
 
 /* === 彩屑 === */
-function launchConfetti(){
+ chConfetti(){
   setInterval(()=>{
     const confetti=document.createElement("div");
     confetti.className="confetti";
     document.body.appendChild(confetti);
 
     const size=Math.random()*12+8;
-    const shape=Math.floor(Math.random()*3);
+    
     confetti.style.width=`${size}px`;
     confetti.style.height=`${size}px`;
     confetti.style.left=`${Math.random()*100}vw`;
     confetti.style.backgroundColor=`hsl(${Math.random()*360},100%,50%)`;
     confetti.style.animationDuration=`${Math.random()*3+2}s`;
 
-    if(shape===1){
-      confetti.style.borderRadius="50%"; // 圓形
-    }else if(shape===2){
-      confetti.style.width="0";
-      confetti.style.height="0";
-      confetti.style.borderLeft=`${size/2}px solid transparent`;
-      confetti.style.borderRight=`${size/2}px solid transparent`;
-      confetti.style.borderBottom=`${size}px solid hsl(${Math.random()*360},100%,50%)`;
-      confetti.style.background="none";
+
     }
 
     setTimeout(()=>confetti.remove(),5000);
