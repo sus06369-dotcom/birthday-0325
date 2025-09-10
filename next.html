@@ -21,93 +21,29 @@
       height: 100%;
       pointer-events: none;
     }
-    #cake1, #cake2 {
+    video {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%) scale(0.8);
       max-width: 40%;
-      opacity: 0;
-      display: none;
-    }
-    #cake1 {
+      height: auto;
       background: transparent;
-    }
-    #cake2 {
-      background: transparent;
-    }
-    #message {
-      position: absolute;
-      top: 75%;
-      left: 50%;
-      transform: translateX(-50%) scale(0.5);
-      font-size: 2.5em;
-      opacity: 0;
-      transition: transform 1s ease, opacity 1s ease;
-      white-space: nowrap;
-    }
-    #buttons {
-      position: absolute;
-      top: 83%;
-      left: 50%;
-      transform: translateX(-50%);
-      display: none;
-      gap: 20px;
-    }
-    button {
-      padding: 12px 24px;
-      font-size: 1.2em;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: transform 0.3s ease, background 0.3s ease;
-    }
-    #likeBtn {
-      background: #ff69b4;
-      color: white;
-    }
-    #dislikeBtn {
-      background: #444;
-      color: white;
-    }
-    #overlayEmoji {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(0);
-      font-size: 8em;
-      opacity: 0;
-      transition: transform 0.5s ease, opacity 0.5s ease;
-      pointer-events: none;
-    }
-    .falling-emoji {
-      position: fixed;
-      top: -50px;
-      font-size: 2em;
-      pointer-events: none;
-      animation: fall linear forwards;
-    }
-    @keyframes fall {
-      to {
-        transform: translateY(110vh) rotate(360deg);
-        opacity: 0.8;
-      }
     }
   </style>
 </head>
 <body>
+  <!-- 彩帶 -->
   <canvas id="confetti"></canvas>
-  <video id="cake1" src="Cake1.webm" autoplay></video>
-  <img id="cake2" src="Cake2.gif" alt="Cake">
-  <div id="message">お誕生日おめでとう</div>
-  <div id="buttons">
-    <button id="likeBtn">我很喜歡</button>
-    <button id="dislikeBtn">我不喜歡</button>
-  </div>
-  <div id="overlayEmoji">🥺</div>
+
+  <!-- 蛋糕影片 -->
+  <video id="cake1" autoplay playsinline>
+    <source src="Cake1.webm" type="video/webm">
+    你的瀏覽器不支援 WebM
+  </video>
 
   <script>
-    // 🎉 繼續保留你的 confetti 原始效果
+    // 🎉 confetti
     const canvas = document.getElementById("confetti");
     const ctx = canvas.getContext("2d");
     let W = window.innerWidth;
@@ -169,73 +105,6 @@
       requestAnimationFrame(animateConfetti);
       drawConfetti();
     })();
-
-    // 🎂 蛋糕切換
-    const cake1 = document.getElementById("cake1");
-    const cake2 = document.getElementById("cake2");
-    const message = document.getElementById("message");
-    const buttons = document.getElementById("buttons");
-    const likeBtn = document.getElementById("likeBtn");
-    const dislikeBtn = document.getElementById("dislikeBtn");
-    const overlayEmoji = document.getElementById("overlayEmoji");
-
-    let dislikeCount = 0;
-
-    cake1.style.display = "block";
-    cake1.style.opacity = 1;
-
-    // ✅ 無縫切換：cake1 播放完 → 立刻換 cake2
-    cake1.addEventListener("ended", () => {
-      cake1.style.display = "none";
-      cake2.style.display = "block";
-      cake2.style.opacity = 1;
-    });
-
-    // 🎉 顯示文字與按鈕（在 cake1 播放後 15 秒觸發）
-    setTimeout(() => {
-      message.style.opacity = 1;
-      message.style.transform = "translateX(-50%) scale(1)";
-      setTimeout(() => {
-        buttons.style.display = "flex";
-      }, 1500);
-    }, 15000);
-
-    // 👍👎 按鈕互動
-    dislikeBtn.addEventListener("click", () => {
-      dislikeCount++;
-      likeBtn.style.transform = `scale(${1 + dislikeCount * 0.2})`;
-      dislikeBtn.style.position = "absolute";
-      dislikeBtn.style.left = Math.random() * 80 + "%";
-      dislikeBtn.style.top = Math.random() * 80 + "%";
-      dislikeBtn.style.transform = `scale(${1 - dislikeCount * 0.1})`;
-
-      if (dislikeCount === 3) {
-        overlayEmoji.textContent = "🥺";
-        overlayEmoji.style.opacity = 1;
-        overlayEmoji.style.transform = "translate(-50%, -50%) scale(1)";
-      }
-      if (dislikeCount > 3) {
-        overlayEmoji.textContent = "🥺";
-        const emoji = document.createElement("div");
-        emoji.textContent = "🥹";
-        emoji.className = "falling-emoji";
-        emoji.style.left = Math.random() * 100 + "vw";
-        emoji.style.animationDuration = 2 + Math.random() * 3 + "s";
-        document.body.appendChild(emoji);
-        setTimeout(() => emoji.remove(), 5000);
-
-        if (dislikeCount === 4) {
-          setTimeout(() => {
-            alert("這樣貝戈戈就是了？🥹\n後面還有東西欸☹️");
-          }, 500);
-        }
-      }
-    });
-
-    likeBtn.addEventListener("click", () => {
-      overlayEmoji.textContent = "🤪";
-      dislikeCount = 0;
-    });
   </script>
 </body>
 </html>
