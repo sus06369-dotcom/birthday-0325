@@ -24,9 +24,9 @@
       flex-direction: column;
     }
 
-    /* 縮放文字動畫 */
+    /* 依序縮放文字 */
     .message {
-      font-size: 2.5em;
+      font-size: 3em; /* 比之前更大 */
       font-weight: bold;
       color: #4b0082;
       opacity: 0;
@@ -42,31 +42,31 @@
 
     /* 倒數 321 更大 */
     .countdown {
-      font-size: 5em;
+      font-size: 6em;
       font-weight: bold;
       color: #4b0082;
     }
 
     /* 蛋糕影片/GIF */
     .cake {
-      max-width: 60%;
+      max-width: 80%; /* 回到之前較大的樣子 */
       display: none;
       margin: 0 auto;
     }
     #cakeGif {
-      margin-top: -50px; /* 往上移，靠上但置中 */
+      margin-top: -30px; /* 靠上 */
     }
 
     /* 生日文字 */
     .celebrate-text {
-      font-size: 3em;
+      font-size: 2.5em; /* 回到之前大小 */
       font-weight: bold;
       color: #4b0082;
       margin-top: 20px;
       opacity: 0;
       transform: scale(0.5);
       animation: zoomInCelebrate 1s forwards;
-      white-space: nowrap; /* 強制一行 */
+      white-space: nowrap; /* 一行顯示 */
     }
 
     @keyframes zoomInCelebrate {
@@ -74,12 +74,13 @@
       to { opacity: 1; transform: scale(1); }
     }
 
-    /* 按鈕區塊 */
+    /* 按鈕區域 */
     .buttons {
       margin-top: 25px;
       display: flex;
       justify-content: center;
       gap: 20px;
+      opacity: 0; /* 預設隱藏，等會用JS控制淡入 */
     }
 
     button {
@@ -88,36 +89,22 @@
       border: none;
       border-radius: 15px;
       cursor: pointer;
-      opacity: 0;
-      transform: translateY(20px);
       transition: transform 0.3s, opacity 0.5s;
-      white-space: nowrap; /* 不換行 */
+      white-space: nowrap;
     }
 
     #likeBtn {
-      background: #ffa559; /* 溫和橘色 */
+      background: #ffa559;
       color: white;
-      animation: fadeInLeft 1s forwards;
     }
 
     #dislikeBtn {
-      background: #5a9dfc; /* 溫和藍色 */
+      background: #5a9dfc;
       color: white;
-      animation: fadeInRight 1s forwards;
     }
 
     button:hover {
       transform: scale(1.1);
-    }
-
-    @keyframes fadeInLeft {
-      from { opacity: 0; transform: translateX(-50px); }
-      to { opacity: 1; transform: translateX(0); }
-    }
-
-    @keyframes fadeInRight {
-      from { opacity: 0; transform: translateX(50px); }
-      to { opacity: 1; transform: translateX(0); }
     }
 
     /* 彩屑 */
@@ -136,28 +123,6 @@
         opacity: 0;
       }
     }
-
-    /* Modal */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6);
-      justify-content: center;
-      align-items: center;
-    }
-    .modal-content {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      text-align: center;
-      max-width: 80%;
-    }
-    .modal-content button {
-      margin-top: 15px;
-      background: #a78bfa;
-    }
   </style>
 </head>
 <body>
@@ -171,18 +136,10 @@
 
     <div id="celebrate" style="display: none;">
       <div class="celebrate-text">お誕生日おめでとう 🎂</div>
-      <div class="buttons">
+      <div class="buttons" id="buttons">
         <button id="likeBtn">我很喜歡</button>
         <button id="dislikeBtn">我不喜歡</button>
       </div>
-    </div>
-  </div>
-
-  <!-- Modal -->
-  <div id="modal" class="modal">
-    <div class="modal-content">
-      <p>沒有其他話了🥹<br>不要再給我點不喜歡了</p>
-      <button id="closeModal">關閉</button>
     </div>
   </div>
 
@@ -243,11 +200,18 @@
       cakeVideo.onended = () => {
         cakeVideo.style.display = "none";
         document.getElementById("cakeGif").style.display = "block";
-        document.getElementById("celebrate").style.display = "block";
+        const celebrate = document.getElementById("celebrate");
+        celebrate.style.display = "block";
+
+        // 按鈕延遲顯示
+        setTimeout(() => {
+          const buttons = document.getElementById("buttons");
+          buttons.style.opacity = "1";
+        }, 1200);
       };
     }
 
-    // 🎉 彩屑效果
+    // 🎉 彩屑效果 (更多)
     function launchConfetti() {
       setInterval(() => {
         const confetti = document.createElement("div");
@@ -262,15 +226,13 @@
         confetti.style.animationDuration = `${Math.random() * 3 + 2}s`;
 
         setTimeout(() => confetti.remove(), 5000);
-      }, 200);
+      }, 100); // 彩屑更多
     }
 
     // 😮‍💨 按鈕互動
     let dislikeCount = 0;
     const dislikeBtn = document.getElementById("dislikeBtn");
     const likeBtn = document.getElementById("likeBtn");
-    const modal = document.getElementById("modal");
-    const closeModal = document.getElementById("closeModal");
 
     dislikeBtn.addEventListener("click", () => {
       dislikeCount++;
@@ -279,12 +241,8 @@
       } else if (dislikeCount === 2) {
         alert("🥹");
       } else if (dislikeCount === 3) {
-        modal.style.display = "flex";
+        alert("沒有其他話了🥹\n不要再給我點不喜歡了");
       }
-    });
-
-    closeModal.addEventListener("click", () => {
-      modal.style.display = "none";
     });
 
     likeBtn.addEventListener("click", () => {
