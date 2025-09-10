@@ -160,20 +160,21 @@ body {
 .modal.show { display:flex; }
 .modal-content {
   background:white;
-  padding:28px 32px;
+  padding:32px 40px; /* 放大內容區 */
   border-radius:12px;
   font-weight:700;
   text-align:center;
-  font-size:1.2em;
+  font-size:1.3em; /* 放大字體 */
 }
 .modal-content button {
-  margin-top:12px;
+  margin-top:16px;
   background:var(--closeBtn);
   color:white;
   border:none;
-  padding:10px 16px;
-  border-radius:8px;
+  padding:14px 22px; /* 放大按鈕 */
+  border-radius:10px;
   font-weight:700;
+  font-size:1.1em; /* 放大文字 */
   cursor:pointer;
 }
 
@@ -287,9 +288,6 @@ function showCelebrate(){
     likeBtn.classList.add("left-in");
     dislikeBtn.classList.add("right-in");
   },1000);
-
-  // 🎉 開始撒彩屑
-  launchConfetti();
 }
 
 /* === 彩屑 === */
@@ -368,6 +366,7 @@ likeBtn.onclick=()=>{
 window.onload=()=>{
   try{bgm.play().catch(()=>{});}catch(e){}
   startSequence();
+  launchConfetti(); // 🚀 進入第二頁就馬上開始撒彩屑
 };
 </script>
 </body>
