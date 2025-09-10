@@ -1,313 +1,328 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>生日小驚喜 Part 2</title>
-
-  <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Surprise 🎉</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
 
   <style>
-    :root{
-      --fg:#4b0082;
-      --bgA:#d8b4fe;
-      --bgB:#fbc2eb;
-    }
-    html,body{height:100%;margin:0;padding:0;}
-    body{
-      min-height:100vh;
-      background: linear-gradient(to right, var(--bgA), var(--bgB));
-      font-family: 'Noto Sans TC', sans-serif;
-      overflow:hidden;
-      color:var(--fg);
-      position:relative;
-      text-align:center;
+    body {
+      margin: 0;
+      font-family: "Noto Sans TC", sans-serif;
+      text-align: center;
+      background: linear-gradient(to right, #d8b4fe, #fbc2eb);
+      overflow: hidden;
     }
 
-    .slide{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; }
-
-    .message{
-      text-align:center;
-      max-width:90%;
-      padding:0 12px;
-      color:var(--fg);
-      font-weight:700;
-      white-space: nowrap;
-      overflow:hidden;
-      font-size: clamp(28px, 7.5vw, 72px);
-      opacity:0;
-      transform: scale(.6);
-      transition: transform .55s, opacity .45s;
+    .container {
+      position: relative;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
     }
 
-    .message.number{
-      font-size: clamp(64px, 28vw, 220px);
-      /* 用同樣的入場動作，但能更強烈 */
-      animation: numberZoomFade 2s forwards;
+    /* 縮放文字動畫 */
+    .message {
+      font-size: 3em;
+      color: #4b0082;
+      opacity: 0;
+      transform: scale(0.5);
+      animation: zoomIn 1s forwards;
     }
-    @keyframes numberZoomFade{
-      0%   { opacity:0; transform: scale(0.5); }
-      25%  { opacity:1; transform: scale(1.25); }
-      55%  { opacity:1; transform: scale(1); }
-      90%  { opacity:1; transform: scale(1); }
-      100% { opacity:0; transform: scale(1); }
+    .message.countdown {
+      font-size: 4em; /* 倒數更大 */
+    }
+    @keyframes zoomIn {
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
     }
 
-    /* cake 區 */ 
-    #cakeWrapper {
+    /* 蛋糕影片 / GIF */
+    .cake {
+      max-width: 80%;
       display: none;
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      top: 8vh; /* 靠上但置中水平 */
-      z-index: 2;
-      text-align:center;
+      opacity: 0;
+      transition: opacity 1s ease;
     }
-    #cakeVideo, #cakeGif {
-      max-width: 60%;
-      height: auto;
+    .cake.show {
       display: block;
-      margin: 0 auto;
+      opacity: 1;
     }
-    #cakeGif { display:none; }
 
-    /* 下面的祝福 & 按鈕（預設隱藏） */
-    #afterCake {
-      display: none;
-      position: absolute;
-      top: 62%;
-      left: 50%;
-      transform: translateX(-50%);
-      text-align:center;
-      z-index: 3;
+    /* 生日快樂文字 */
+    .celebrate-text {
+      font-size: 3em;
+      color: #4b0082;
+      margin-top: 20px;
+      opacity: 0;
+      transform: scale(0.5);
+      animation: zoomIn 1s forwards;
     }
-    #afterCake .celebrate {
-      font-size: clamp(28px, 6vw, 56px);
-      font-weight:700;
-      color:var(--fg);
-      opacity:0;
-      transform: scale(0.6);
-      transition: transform .6s, opacity .5s;
-      white-space: nowrap;
-    }
-    #buttons {
-      margin-top: 18px;
-      display:flex;
-      gap:20px;
-      justify-content:center;
-      opacity:0;
-      transition: opacity .6s;
+
+    /* 按鈕樣式 */
+    .buttons {
+      margin-top: 25px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
     }
     button {
-      padding: 12px 24px;
-      border-radius: 12px;
+      padding: 12px 25px;
+      font-size: 1.2em;
+      color: white;
       border: none;
-      font-weight:700;
+      border-radius: 15px;
       cursor: pointer;
-      font-size: 1.05rem;
+      transition: transform 0.2s;
     }
-    #likeBtn { background: #f4a261; color: white; } /* 溫和橘 */
-    #dislikeBtn { background: #6ca0dc; color: white; } /* 溫和藍 */
-
-    /* modal (和第一頁風格一致) */
-    .modal { display:none; position:fixed; inset:0; background: rgba(0,0,0,0.5); justify-content:center; align-items:center; }
-    .modal .modal-content {
-      background:white; padding:20px 28px; border-radius:10px; color:var(--fg); font-weight:700; text-align:center;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+    button:hover {
+      transform: scale(1.1);
+    }
+    #likeBtn {
+      background: #ffb84d; /* 溫和橘色 */
+    }
+    #dislikeBtn {
+      background: #4da6ff; /* 溫和藍色 */
     }
 
-    /* confetti (簡單) */
-    .confetti { position: absolute; width: 10px; height:10px; border-radius: 3px; top: -12px; opacity:0.95; }
-    @keyframes fall { to { transform: translateY(110vh) rotate(720deg); opacity:0; } }
+    /* 彩屑效果 */
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background-color: red;
+      top: -10px;
+      opacity: 0.7;
+      animation: fall linear forwards;
+    }
+    @keyframes fall {
+      to {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+
+    /* 提示框 */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: white;
+      padding: 20px 30px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 1.2em;
+      color: #4b0082;
+      box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
+    }
+    .modal-content button {
+      margin-top: 15px;
+      background: #a78bfa;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
+  <div class="container" id="main-container">
+    <div id="text-container"></div>
 
-  <!-- 文字序列容器 -->
-  <div id="textRoot"></div>
+    <video id="cakeVideo" class="cake" muted playsinline>
+      <source src="Cake1.webm" type="video/webm">
+    </video>
+    <img id="cakeGif" class="cake" src="Cake2.gif" alt="Cake">
 
-  <!-- 蛋糕區 -->
-  <div id="cakeWrapper">
-    <video id="cakeVideo" src="Cake1.webm" playsinline autoplay muted></video>
-    <img id="cakeGif" src="Cake2.gif" alt="cake gif">
-  </div>
-
-  <!-- 顯示祝福與按鈕 -->
-  <div id="afterCake">
-    <div class="celebrate" id="celebrateText">お誕生日おめでとう 🎂</div>
-    <div id="buttons">
-      <button id="likeBtn">我很喜歡</button>
-      <button id="dislikeBtn">我不喜歡</button>
+    <div id="celebrate" style="display: none;">
+      <div class="celebrate-text">お誕生日おめでとう 🎂</div>
+      <div class="buttons">
+        <button id="likeBtn">我很喜歡</button>
+        <button id="dislikeBtn">我不喜歡</button>
+      </div>
     </div>
   </div>
 
-  <!-- 與第一頁相同風格的提示框（只用於「太多不喜歡」那情況） -->
-  <div id="errorModal" class="modal">
-    <div class="modal-content" id="errorContent">
-      <p id="errorLine1">欸～都已經提示了</p>
-      <p id="errorLine2">你還輸入錯誤傷心了都～～</p>
-      <button onclick="closeError()">好啦我重試</button>
+  <!-- 提示框 -->
+  <div id="dislikeModal" class="modal">
+    <div class="modal-content">
+      <p id="dislikeMessage">你忍心嗎？🥺</p>
+      <button onclick="closeDislikeModal()">關閉</button>
     </div>
   </div>
 
-  <!-- 背景音樂（不在此頁互動時先以 localStorage 判斷，index.html 有設） -->
   <audio id="bgm" src="blessing.mp3" loop></audio>
 
-<script>
-/* === 頁面啟動，播放音樂（若 index.html 已經允許） & 啟動文字序列與彩屑 === */
-window.addEventListener('load', ()=> {
-  const bgm = document.getElementById('bgm');
-  if (localStorage.getItem('bgmAllowed') === 'true') {
-    bgm.play().catch(()=> console.log('bgm autoplay blocked'));
-  }
-  startSequence();
-  startConfetti();
-});
+  <script>
+    // ✅ 進入頁面自動播放背景音樂
+    window.addEventListener("load", () => {
+      const bgm = document.getElementById("bgm");
+      if (localStorage.getItem("bgmAllowed") === "true") {
+        bgm.play().catch(() => console.log("自動播放被阻止"));
+      }
+      startSequence();
+      launchConfetti();
+    });
 
-/* 文字序列（每段占滿畫面，最後顯示蛋糕） */
-const messages = [
-  "嘿～芝茉妲絲",
-  "今天是屬於",
-  "🫵🏻🫵🏻你🫵🏻🫵🏻",
-  "特別日子！！！",
-  "準備好了嗎？🧐",
-  "就算還沒👀",
-  "也給我準備好😎",
-  "不等你的🥳",
-  "3", "2", "1"
-];
+    // 依序文字
+    const messages = [
+      "嘿～芝茉妲絲",
+      "今天是屬於",
+      "🫵🫵你🫵🫵",
+      "特別日子！！！",
+      "準備好了嗎？🧐",
+      "就算還沒👀",
+      "也給我準備好😎",
+      "不等你的🥳",
+      "3", "2", "1"
+    ];
 
-function startSequence(){
-  const root = document.getElementById('textRoot');
-  let i = 0;
-  function showNext(){
-    if (i < messages.length) {
-      root.innerHTML = '';
-      const slide = document.createElement('div');
-      slide.className = 'slide';
-      const msg = document.createElement('div');
-      // 數字用 bigger class (樣式在上面使用 .message.number)
-      msg.className = (messages[i]==='3' || messages[i]==='2' || messages[i]==='1') ? 'message number' : 'message';
-      msg.textContent = messages[i];
-      slide.appendChild(msg);
-      root.appendChild(slide);
-      i++;
-      setTimeout(showNext, 1500); // 每 1.5 秒換一段
-    } else {
-      // 結束文字序列 → 顯示蛋糕
-      root.innerHTML = '';
-      showCake();
+    function startSequence() {
+      const container = document.getElementById("text-container");
+      let i = 0;
+
+      function showNext() {
+        if (i < messages.length) {
+          const msg = document.createElement("div");
+          msg.className = "message";
+          if (["3","2","1"].includes(messages[i])) {
+            msg.classList.add("countdown");
+          }
+          msg.textContent = messages[i];
+          container.innerHTML = "";
+          container.appendChild(msg);
+          i++;
+          setTimeout(showNext, 1500);
+        } else {
+          showCake();
+        }
+      }
+      showNext();
     }
-  }
-  showNext();
-}
 
-/* 蛋糕：播放 cakeVideo（一次），播放完切換成 cakeGif，然後顯示祝福文字與按鈕 */
-function showCake(){
-  const cakeWrapper = document.getElementById('cakeWrapper');
-  const video = document.getElementById('cakeVideo');
-  const gif = document.getElementById('cakeGif');
-  const after = document.getElementById('afterCake');
+    // 蛋糕切換效果
+    function showCake() {
+      const container = document.getElementById("text-container");
+      container.innerHTML = "";
+      const cakeVideo = document.getElementById("cakeVideo");
+      const cakeGif = document.getElementById("cakeGif");
 
-  // 顯示影片（影片未設定 loop）
-  cakeWrapper.style.display = 'block';
+      cakeVideo.classList.add("show");
+      cakeVideo.play();
 
-  // 先嘗試播放（video element 可能需要 muted 才能 autoplay，視你的檔案）
-  video.play().catch(()=> console.log('video play blocked'));
-
-  // 當影片結束，切換到 GIF 並顯示祝福與按鈕（延遲一點讓切換不突兀）
-  video.addEventListener('ended', () => {
-    // 隱藏影片、顯示 gif（盡量不閃：先把 gif 設為 visible 且透明度切換）
-    video.style.display = 'none';
-    gif.style.display = 'block';
-    // 顯示祝福文字（縮放效果）
-    setTimeout(()=>{
-      const txt = document.getElementById('celebrateText');
-      txt.style.opacity = 1;
-      txt.style.transform = 'scale(1)';
-      // 再等 1.2s 顯示按鈕
-      setTimeout(()=>{
-        document.getElementById('buttons').style.opacity = 1;
-        document.getElementById('afterCake').style.display = 'block';
-      }, 1200);
-    }, 300);
-  });
-
-  // 有時候 video element 在某些瀏覽器會 loop 或快轉，強制 remove loop
-  video.loop = false;
-}
-
-/* confetti 簡單不停產生（直到頁面關閉） */
-function startConfetti(){
-  setInterval(()=> {
-    const el = document.createElement('div');
-    el.className = 'confetti';
-    const size = Math.random()*12 + 6;
-    el.style.width = size + 'px';
-    el.style.height = size + 'px';
-    el.style.left = (Math.random()*100) + 'vw';
-    el.style.backgroundColor = `hsl(${Math.random()*360},80%,65%)`;
-    el.style.animationDuration = (Math.random()*3 + 2) + 's';
-    document.body.appendChild(el);
-    setTimeout(()=> el.remove(), 5000);
-  }, 160);
-}
-
-/* 按鈕互動：我不喜歡三階段邏輯（第一顯示表情, 第二掉落, 第三跳 modal） */
-let dislikeCount = 0;
-const dislikeBtn = document.getElementById('dislikeBtn');
-const likeBtn = document.getElementById('likeBtn');
-
-dislikeBtn.addEventListener('click', () => {
-  dislikeCount++;
-  if (dislikeCount === 1) {
-    // 第一次：用系統 alert 顯示簡單表情（你先前要的是顯示 🥺，若需 modal 可改）
-    alert('🥺');
-  } else if (dislikeCount === 2) {
-    // 第二次：製造幾個 emoji 落下（像 confetti）
-    for (let k=0;k<8;k++){
-      const e = document.createElement('div');
-      e.textContent = '🥹';
-      e.style.position = 'fixed';
-      e.style.left = (Math.random()*90)+'vw';
-      e.style.top = '-30px';
-      e.style.fontSize = (18 + Math.random()*22) + 'px';
-      e.style.zIndex = 40;
-      e.style.transition = 'transform 3s linear, opacity 3s';
-      document.body.appendChild(e);
-      // translateY animation via requestAnimationFrame
-      (function(el){
-        setTimeout(()=> { el.style.transform = `translateY(${110 + Math.random()*30}vh)`; el.style.opacity = '0.9'; }, 20);
-        setTimeout(()=> el.remove(), 3500);
-      })(e);
+      cakeVideo.onended = () => {
+        cakeVideo.classList.remove("show"); // 淡出影片
+        setTimeout(() => {
+          cakeVideo.style.display = "none";
+          cakeGif.classList.add("show"); // 淡入 GIF
+          document.getElementById("celebrate").style.display = "block";
+        }, 1000);
+      };
     }
-  } else {
-    // 第三次及以上：顯示跟第一頁一樣風格的 modal（并可重覆）
-    const modal = document.getElementById('errorModal');
-    const content = document.querySelector('#errorModal .modal-content');
-    // 修改為你想要的文字（這裡示範：你忍心嗎？）
-    content.querySelector('p:nth-child(1)').textContent = '你忍心嗎？🥺';
-    content.querySelector('p:nth-child(2)').textContent = '';
-    modal.style.display = 'flex';
-  }
-});
 
-/* modal 關閉 */
-function closeError(){
-  const m = document.getElementById('errorModal');
-  m.style.display = 'none';
-  // 重設計數（如你要求按第三次後關閉要回復原位）
-  dislikeCount = 0;
-}
+    // 🎉 彩屑效果
+    function launchConfetti() {
+      setInterval(() => {
+        const confetti = document.createElement("div");
+        confetti.className = "confetti";
+        document.body.appendChild(confetti);
 
-/* like 按鈕：可在這邊放你要跳轉或下一步的行為 */
-likeBtn.addEventListener('click', ()=>{
-  // 目前先停止 confetti（若想保留可改）
-  // 直接示範：重設頁面或下一個流程（這裏暫不自動跳）
-  console.log('like clicked — 你可以在這加入下一頁邏輯');
-});
+        const size = Math.random() * 10 + 5;
+        confetti.style.width = `${size}px`;
+        confetti.style.height = `${size}px`;
+        confetti.style.left = `${Math.random() * 100}vw`;
+        confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+        confetti.style.animationDuration = `${Math.random() * 3 + 2}s`;
 
-</script>
+        setTimeout(() => confetti.remove(), 5000);
+      }, 150);
+    }
+
+    // ❌ 我不喜歡按鈕互動
+    let dislikeClickCount = 0;
+    const dislikeBtn = document.getElementById("dislikeBtn");
+    const likeBtn = document.getElementById("likeBtn");
+    const dislikeModal = document.getElementById("dislikeModal");
+    const dislikeMessage = document.getElementById("dislikeMessage");
+
+    dislikeBtn.addEventListener("click", () => {
+      dislikeClickCount++;
+
+      if (dislikeClickCount === 1) {
+        showEmoji("🥺");
+      } else if (dislikeClickCount === 2) {
+        dropEmojis("🥹");
+      } else {
+        showDislikeModal();
+      }
+    });
+
+    function showEmoji(emoji) {
+      const cakeGif = document.getElementById("cakeGif");
+      const emojiDiv = document.createElement("div");
+      emojiDiv.textContent = emoji;
+      emojiDiv.style.position = "absolute";
+      emojiDiv.style.top = cakeGif.offsetTop + "px";
+      emojiDiv.style.left = "50%";
+      emojiDiv.style.transform = "translateX(-50%)";
+      emojiDiv.style.fontSize = "4em";
+      emojiDiv.id = "emojiOverlay";
+      document.body.appendChild(emojiDiv);
+    }
+
+    function dropEmojis(emoji) {
+      for (let i = 0; i < 20; i++) {
+        const e = document.createElement("div");
+        e.textContent = emoji;
+        e.style.position = "absolute";
+        e.style.left = Math.random() * 100 + "vw";
+        e.style.top = "-50px";
+        e.style.fontSize = "2em";
+        e.style.animation = `fall ${Math.random() * 3 + 2}s linear forwards`;
+        document.body.appendChild(e);
+        setTimeout(() => e.remove(), 5000);
+      }
+    }
+
+    function showDislikeModal() {
+      const messages = [
+        "你忍心嗎？🥺",
+        "不要開玩笑啦…🥺",
+        "你再點我都快碎掉了🥹",
+        "好了，已經傷心了\n沒有其他話了🥹\n不要再給我點不喜歡了\n後面還有東西"
+      ];
+      let msgIndex = Math.min(dislikeClickCount - 3, messages.length - 1);
+      dislikeMessage.textContent = messages[msgIndex];
+      dislikeModal.style.display = "flex";
+
+      // 移除第一次顯示的 🥺
+      const emojiOverlay = document.getElementById("emojiOverlay");
+      if (emojiOverlay) emojiOverlay.remove();
+    }
+
+    function closeDislikeModal() {
+      dislikeModal.style.display = "none";
+    }
+
+    // ✅ 我很喜歡按鈕互動
+    likeBtn.addEventListener("click", () => {
+      document.getElementById("main-container").innerHTML = `
+        <h1 style="color:#4b0082;">💖 後續內容製作區塊 💖</h1>
+        <p style="color:#4b0082;">（這裡之後可以加新的驚喜內容）</p>
+      `;
+    });
+  </script>
 </body>
 </html>
