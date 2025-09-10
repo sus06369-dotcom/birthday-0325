@@ -1,194 +1,241 @@
- <!DOCTYPE html>
-<html lang="zh-Hant">
+<!DOCTYPE html>
+<html lang="ja">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>生日小驚喜 Part 2</title>
-
-<!-- Google Font -->
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@700&display=swap" rel="stylesheet">
-
-<style>
-  :root{
-    --fg:#4b0082;
-    --bgA:#d8b4fe;
-    --bgB:#fbc2eb;
-  }
-
-  html,body{height:100%;margin:0;padding:0;}
-  body{
-    min-height:100vh;
-    background: linear-gradient(to right, var(--bgA), var(--bgB));
-    font-family: 'Noto Sans TC', sans-serif;
-    overflow:hidden;
-    color:var(--fg);
-    position:relative;
-  }
-
-  .slide{
-    position:fixed;
-    inset:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    pointer-events:none;
-  }
-
-  .message{
-    text-align:center;
-    max-width:90%;
-    padding:0 12px;
-    color:var(--fg);
-    font-weight:700;
-    white-space: nowrap;
-    overflow:hidden;
-  }
-
-  .message.text{
-    font-size: clamp(28px, 7.5vw, 72px);
-    animation: textZoomIn 2s forwards;
-  }
-
-  @keyframes textZoomIn{
-    0%   { opacity:0; transform: scale(0.5); }
-    25%  { opacity:1; transform: scale(1.25); }
-    55%  { opacity:1; transform: scale(1); }
-    100% { opacity:1; transform: scale(1); }
-  }
-
-  .message.number{
-    font-size: clamp(64px, 28vw, 220px);
-    animation: numberZoomFade 2s forwards;
-  }
-
-  @keyframes numberZoomFade{
-    0%   { opacity:0; transform: scale(0.5); }
-    25%  { opacity:1; transform: scale(1.25); }
-    55%  { opacity:1; transform: scale(1); }
-    90%  { opacity:1; transform: scale(1); }
-    100% { opacity:0; transform: scale(1); }
-  }
-
-  .confetti{
-    position: fixed;
-    top: -18px;
-    width:10px; height:10px;
-    border-radius:3px;
-    opacity:0.95;
-    z-index: 5;
-    pointer-events:none;
-    will-change: transform;
-    animation: confettiFall linear forwards;
-  }
-
-  @keyframes confettiFall{
-    to { transform: translateY(110vh) translateX(var(--drift,0px)) rotate(720deg); }
-  }
-
-  /* 🎂 蛋糕容器 */
-  #cakeWrapper{
-    display:none;
-    text-align:center;
-    margin-top:40px;
-  }
-  #cakeVideo{
-    width:300px;
-    max-width:80%;
-    opacity:0;
-    transform: scale(0.5);
-    transition: opacity 1.2s ease, transform 1.2s ease;
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>Birthday</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #111;
+      overflow: hidden;
+      text-align: center;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    #cake1, #cake2 {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      max-width: 40%;
+      opacity: 0;
+      display: none;
+    }
+    #cake1 {
+      background: transparent;
+    }
+    #cake2 {
+      background: transparent;
+    }
+    #message {
+      position: absolute;
+      top: 75%;
+      left: 50%;
+      transform: translateX(-50%) scale(0.5);
+      font-size: 2.5em;
+      opacity: 0;
+      transition: transform 1s ease, opacity 1s ease;
+      white-space: nowrap;
+    }
+    #buttons {
+      position: absolute;
+      top: 83%;
+      left: 50%;
+      transform: translateX(-50%);
+      display: none;
+      gap: 20px;
+    }
+    button {
+      padding: 12px 24px;
+      font-size: 1.2em;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.3s ease, background 0.3s ease;
+    }
+    #likeBtn {
+      background: #ff69b4;
+      color: white;
+    }
+    #dislikeBtn {
+      background: #444;
+      color: white;
+    }
+    #overlayEmoji {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      font-size: 8em;
+      opacity: 0;
+      transition: transform 0.5s ease, opacity 0.5s ease;
+      pointer-events: none;
+    }
+    .falling-emoji {
+      position: fixed;
+      top: -50px;
+      font-size: 2em;
+      pointer-events: none;
+      animation: fall linear forwards;
+    }
+    @keyframes fall {
+      to {
+        transform: translateY(110vh) rotate(360deg);
+        opacity: 0.8;
+      }
+    }
+  </style>
 </head>
 <body>
+  <canvas id="confetti"></canvas>
+  <video id="cake1" src="Cake1.webm" autoplay></video>
+  <img id="cake2" src="Cake2.gif" alt="Cake">
+  <div id="message">お誕生日おめでとう</div>
+  <div id="buttons">
+    <button id="likeBtn">我很喜歡</button>
+    <button id="dislikeBtn">我不喜歡</button>
+  </div>
+  <div id="overlayEmoji">🥺</div>
 
-<audio id="bgm" autoplay loop>
-  <source src="blessing.mp3" type="audio/mpeg">
-</audio>
+  <script>
+    // 🎉 繼續保留你的 confetti 原始效果
+    const canvas = document.getElementById("confetti");
+    const ctx = canvas.getContext("2d");
+    let W = window.innerWidth;
+    let H = window.innerHeight;
+    canvas.width = W;
+    canvas.height = H;
 
-<!-- 🎂 蛋糕影片 -->
-<div id="cakeWrapper">
-  <video id="cakeVideo" src="Cake1.webm" autoplay playsinline></video>
-</div>
+    const confettiCount = 150;
+    const confetti = [];
+    for (let i = 0; i < confettiCount; i++) {
+      confetti.push({
+        x: Math.random() * W,
+        y: Math.random() * H - H,
+        r: Math.random() * 6 + 4,
+        d: Math.random() * confettiCount,
+        color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+        tilt: Math.floor(Math.random() * 10) - 10,
+        tiltAngleIncremental: Math.random() * 0.07 + 0.05,
+        tiltAngle: 0,
+      });
+    }
 
-<script>
-const bgm = document.getElementById('bgm');
-const wantA = localStorage.getItem('bgmAllowed') === 'true';
-const wantB = localStorage.getItem('bgmPlaying') === 'true';
-if (wantA || wantB) {
-  bgm.play().catch(()=>{ console.log('bgm.play() 被阻擋'); });
-}
+    function drawConfetti() {
+      ctx.clearRect(0, 0, W, H);
+      confetti.forEach((c, i) => {
+        ctx.beginPath();
+        ctx.lineWidth = c.r / 2;
+        ctx.strokeStyle = c.color;
+        ctx.moveTo(c.x + c.tilt + c.r / 4, c.y);
+        ctx.lineTo(c.x + c.tilt, c.y + c.tilt + c.r / 4);
+        ctx.stroke();
+      });
+      updateConfetti();
+    }
 
-const messages = [
-  "嘿～芝茉妲絲",
-  "今天是屬於",
-  "🫵🏻🫵🏻你🫵🏻🫵🏻",
-  "特別日子！！！",
-  "準備好了嗎？🧐",
-  "就算還沒👀",
-  "也給我準備好😎",
-  "不等你的🥳",
-  "5","4","3","2","1"
-];
+    function updateConfetti() {
+      confetti.forEach((c, i) => {
+        c.tiltAngle += c.tiltAngleIncremental;
+        c.y += (Math.cos(c.d) + 3 + c.r / 2) / 2;
+        c.x += Math.sin(0.5);
+        c.tilt = Math.sin(c.tiltAngle - i / 3) * 15;
 
-let idx = 0;
-const DURATION_NORMAL = 2000;
-const DURATION_NUMBER = 2000;
+        if (c.y > H) {
+          confetti[i] = {
+            x: Math.random() * W,
+            y: -10,
+            r: c.r,
+            d: c.d,
+            color: c.color,
+            tilt: c.tilt,
+            tiltAngleIncremental: c.tiltAngleIncremental,
+            tiltAngle: c.tiltAngle,
+          };
+        }
+      });
+    }
 
-function showNext(){
-  if (idx >= messages.length) return;
-  const txt = messages[idx];
-  const isNumber = !isNaN(txt);
+    (function animateConfetti() {
+      requestAnimationFrame(animateConfetti);
+      drawConfetti();
+    })();
 
-  const slide = document.createElement('div');
-  slide.className = 'slide';
+    // 🎂 蛋糕切換
+    const cake1 = document.getElementById("cake1");
+    const cake2 = document.getElementById("cake2");
+    const message = document.getElementById("message");
+    const buttons = document.getElementById("buttons");
+    const likeBtn = document.getElementById("likeBtn");
+    const dislikeBtn = document.getElementById("dislikeBtn");
+    const overlayEmoji = document.getElementById("overlayEmoji");
 
-  const msg = document.createElement('div');
-  msg.className = 'message ' + (isNumber ? 'number' : 'text');
-  msg.textContent = txt;
+    let dislikeCount = 0;
 
-  slide.appendChild(msg);
-  document.body.appendChild(slide);
+    cake1.style.display = "block";
+    cake1.style.opacity = 1;
 
-  const dur = isNumber ? DURATION_NUMBER : DURATION_NORMAL;
-  setTimeout(()=> {
-    slide.remove();
-    idx++;
-    showNext();
-    if(idx === messages.length){ showCake(); }
-  }, dur);
-}
-showNext();
+    // ✅ 無縫切換：cake1 播放完 → 立刻換 cake2
+    cake1.addEventListener("ended", () => {
+      cake1.style.display = "none";
+      cake2.style.display = "block";
+      cake2.style.opacity = 1;
+    });
 
-function createConfetti(){
-  const c = document.createElement('div');
-  c.className = 'confetti';
-  const colors = ["#ffd500","#ff69b4","#00bfff","#7cfc00","#ff4500","#ffffff"];
-  c.style.background = colors[Math.floor(Math.random()*colors.length)];
-  c.style.left = Math.random() * window.innerWidth + 'px';
-  const size = Math.random() * 14 + 6;
-  c.style.width = size + 'px';
-  c.style.height = size + 'px';
-  const drift = (Math.random()*260 - 130) + 'px';
-  c.style.setProperty('--drift', drift);
-  const duration = Math.random()*3 + 2;
-  c.style.animationDuration = duration + 's';
+    // 🎉 顯示文字與按鈕（在 cake1 播放後 15 秒觸發）
+    setTimeout(() => {
+      message.style.opacity = 1;
+      message.style.transform = "translateX(-50%) scale(1)";
+      setTimeout(() => {
+        buttons.style.display = "flex";
+      }, 1500);
+    }, 15000);
 
-  document.body.appendChild(c);
-  setTimeout(()=> c.remove(), duration*1000 + 200);
-}
-setInterval(createConfetti, 120);
+    // 👍👎 按鈕互動
+    dislikeBtn.addEventListener("click", () => {
+      dislikeCount++;
+      likeBtn.style.transform = `scale(${1 + dislikeCount * 0.2})`;
+      dislikeBtn.style.position = "absolute";
+      dislikeBtn.style.left = Math.random() * 80 + "%";
+      dislikeBtn.style.top = Math.random() * 80 + "%";
+      dislikeBtn.style.transform = `scale(${1 - dislikeCount * 0.1})`;
 
-// 🎂 顯示蛋糕影片
-function showCake(){
-  const cakeWrapper = document.getElementById("cakeWrapper");
-  const cakeVideo = document.getElementById("cakeVideo");
-  cakeWrapper.style.display = "block";
-  setTimeout(()=>{ 
-    cakeVideo.style.opacity = 1;
-    cakeVideo.style.transform = "scale(1)";
-  },100);
-}
-</script>
+      if (dislikeCount === 3) {
+        overlayEmoji.textContent = "🥺";
+        overlayEmoji.style.opacity = 1;
+        overlayEmoji.style.transform = "translate(-50%, -50%) scale(1)";
+      }
+      if (dislikeCount > 3) {
+        overlayEmoji.textContent = "🥺";
+        const emoji = document.createElement("div");
+        emoji.textContent = "🥹";
+        emoji.className = "falling-emoji";
+        emoji.style.left = Math.random() * 100 + "vw";
+        emoji.style.animationDuration = 2 + Math.random() * 3 + "s";
+        document.body.appendChild(emoji);
+        setTimeout(() => emoji.remove(), 5000);
+
+        if (dislikeCount === 4) {
+          setTimeout(() => {
+            alert("這樣貝戈戈就是了？🥹\n後面還有東西欸☹️");
+          }, 500);
+        }
+      }
+    });
+
+    likeBtn.addEventListener("click", () => {
+      overlayEmoji.textContent = "🤪";
+      dislikeCount = 0;
+    });
+  </script>
 </body>
 </html>
