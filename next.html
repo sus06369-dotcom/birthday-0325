@@ -15,7 +15,7 @@
   --bgB: #fbc2eb;
   --like: #ffb86b;
   --dislike: #7fb3ff;
-  --closeBtn: #8a2be2; /* 紫色關閉按鈕 */
+  --btnPurple: #9b5de5;
 }
 html, body { height:100%; margin:0; padding:0; }
 body {
@@ -44,8 +44,8 @@ body {
 }
 .msg.show { opacity:1; transform: scale(1); }
 .msg.hide { opacity:0; transform: scale(.8); }
-.msg.normal { font-size: clamp(28px, 6vw, 72px); }
-.msg.count { font-size: clamp(72px, 20vw, 220px); }
+.msg.normal { font-size: clamp(32px, 7vw, 80px); }
+.msg.count { font-size: clamp(80px, 22vw, 240px); }
 
 /* 蛋糕區 */
 #cake-area {
@@ -91,7 +91,7 @@ body {
   opacity:0;
 }
 .btn {
-  padding:10px 22px;
+  padding:12px 26px;
   border:none;
   border-radius:12px;
   font-weight:700;
@@ -132,19 +132,10 @@ body {
 }
 @keyframes fall { to { transform:translateY(110vh); opacity:0; } }
 
-/* 彩屑 */
-.confetti {
-  position: fixed;
-  top: -10px;
-  opacity: 0.9;
-  z-index: 6;
-  animation: confettiFall linear forwards;
-}
-@keyframes confettiFall {
-  to {
-    transform: translateY(110vh) rotate(720deg);
-    opacity: 0;
-  }
+/* 旋轉飄落動畫 (🥹 專用) */
+@keyframes emojiFallSpin {
+  0% { transform: translateY(0) rotate(0deg); opacity:1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity:0; }
 }
 
 /* modal */
@@ -160,21 +151,21 @@ body {
 .modal.show { display:flex; }
 .modal-content {
   background:white;
-  padding:32px 40px; /* 放大內容區 */
+  padding:26px 32px;   /* 👈 放大提示框 */
   border-radius:12px;
   font-weight:700;
   text-align:center;
-  font-size:1.3em; /* 放大字體 */
+  max-width:80%;
 }
 .modal-content button {
   margin-top:16px;
-  background:var(--closeBtn);
+  background:var(--btnPurple); /* 👈 紫色按鈕 */
   color:white;
   border:none;
-  padding:14px 22px; /* 放大按鈕 */
-  border-radius:10px;
+  padding:12px 20px;  /* 👈 放大按鈕 */
+  border-radius:8px;
   font-weight:700;
-  font-size:1.1em; /* 放大文字 */
+  font-size:16px;
   cursor:pointer;
 }
 
@@ -290,36 +281,6 @@ function showCelebrate(){
   },1000);
 }
 
-/* === 彩屑 === */
-function launchConfetti(){
-  setInterval(()=>{
-    const confetti=document.createElement("div");
-    confetti.className="confetti";
-    document.body.appendChild(confetti);
-
-    const size=Math.random()*12+8;
-    const shape=Math.floor(Math.random()*3);
-    confetti.style.width=`${size}px`;
-    confetti.style.height=`${size}px`;
-    confetti.style.left=`${Math.random()*100}vw`;
-    confetti.style.backgroundColor=`hsl(${Math.random()*360},100%,50%)`;
-    confetti.style.animationDuration=`${Math.random()*3+2}s`;
-
-    if(shape===1){
-      confetti.style.borderRadius="50%"; // 圓形
-    }else if(shape===2){
-      confetti.style.width="0";
-      confetti.style.height="0";
-      confetti.style.borderLeft=`${size/2}px solid transparent`;
-      confetti.style.borderRight=`${size/2}px solid transparent`;
-      confetti.style.borderBottom=`${size}px solid hsl(${Math.random()*360},100%,50%)`;
-      confetti.style.background="none";
-    }
-
-    setTimeout(()=>confetti.remove(),5000);
-  },120);
-}
-
 /* === 不喜歡互動 === */
 dislikeBtn.onclick=()=>{
   dislikeCount++;
@@ -330,14 +291,17 @@ dislikeBtn.onclick=()=>{
     emojiOverlay.classList.add("show");
     setTimeout(()=>emojiOverlay.classList.remove("show"),1500);
   }else if(dislikeCount===2){
-    for(let i=0;i<10;i++){
+    // 第二次：掉落旋轉的 🥹
+    for(let i=0;i<20;i++){
       const e=document.createElement("div");
       e.className="emoji-fall";
       e.textContent="🥹";
       e.style.left=(Math.random()*90)+"vw";
-      e.style.animationDuration=(2+Math.random()*3)+"s";
+      e.style.fontSize=(28+Math.random()*12)+"px";
+      e.style.animationDuration=(3+Math.random()*3)+"s";
+      e.style.animationName="emojiFallSpin";  // 旋轉動畫
       document.body.appendChild(e);
-      setTimeout(()=>e.remove(),5000);
+      setTimeout(()=>e.remove(),6000);
     }
   }else if(dislikeCount>=3){
     let text="";
@@ -366,7 +330,6 @@ likeBtn.onclick=()=>{
 window.onload=()=>{
   try{bgm.play().catch(()=>{});}catch(e){}
   startSequence();
-  launchConfetti(); // 🚀 進入第二頁就馬上開始撒彩屑
 };
 </script>
 </body>
