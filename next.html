@@ -165,14 +165,18 @@ body {
 .modal.show { display:flex; }
 .modal-content {
   background:white;
-  padding:48px 60px; /* 放大內容區 */
+  padding:48px 60px 80px; /* 放大內容區 */
   border-radius:14px;
   font-weight:700;
   text-align:center;
   font-size:1.6em; /* 放大字體 */
+  position:relative;
 }
 .modal-content button {
-  margin-top:20px;
+  position:absolute;
+  button: 20px;
+  left: 50%;
+  transform:translateX(-50%);
   background:var(--closeBtn);
   color:white;
   border:none;
