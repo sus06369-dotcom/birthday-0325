@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
@@ -111,18 +111,8 @@
     /* 彩屑 (正方形 + 旋轉) */
     .confetti {
       position: absolute;
-      width: 10px;
-      height: 10px;
-      background-color: red;
       top: -10px;
-      opacity: 0.8;
-      animation: fall linear forwards;
-    }
-    @keyframes fall {
-      to {
-        transform: translateY(100vh) rotate(720deg);
-        opacity: 0;
-      }
+      opacity: 0.9;
     }
 
     /* Modal */
@@ -146,7 +136,7 @@
     }
     .modal-content button {
       margin-top: 15px;
-      background: #a855f7; /* 紫色 */
+      background: #a855f7;
       color: white;
       border: none;
       padding: 12px 20px;
@@ -253,21 +243,23 @@
       };
     }
 
-    // 🎉 彩屑
+    // 🎉 彩屑 (正方形旋轉)
     function launchConfetti() {
       setInterval(() => {
         const confetti = document.createElement("div");
         confetti.className = "confetti";
         document.body.appendChild(confetti);
 
-        const size = Math.random() * 10 + 5;
+        const size = Math.random() * 12 + 6;
         confetti.style.width = `${size}px`;
         confetti.style.height = `${size}px`;
         confetti.style.left = `${Math.random() * 100}vw`;
         confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
-        confetti.style.animationDuration = `${Math.random() * 3 + 2}s`;
 
-        setTimeout(() => confetti.remove(), 5000);
+        const duration = Math.random() * 3 + 2;
+        confetti.style.animation = `fall ${duration}s linear forwards, spin ${duration}s linear infinite`;
+
+        setTimeout(() => confetti.remove(), duration * 1000);
       }, 120);
     }
 
@@ -285,7 +277,6 @@
       if (dislikeCount === 1) {
         alert("🥺");
       } else if (dislikeCount === 2) {
-        // 🥹 掉落，部分旋轉
         for (let i = 0; i < 20; i++) {
           const wrapper = document.createElement("div");
           const e = document.createElement("div");
@@ -323,15 +314,18 @@
       modal.classList.remove("show");
     };
 
-    // 🥹 下落動畫
+    // 🥹 下落動畫 & 彩屑動畫
     const style = document.createElement("style");
     style.innerHTML = `
-      @keyframes fall-emoji {
-        to { transform: translateY(110vh); opacity: 0; }
+      @keyframes fall {
+        to { transform: translateY(100vh) rotate(720deg); opacity: 0; }
       }
       @keyframes spin {
         from { transform: rotate(0deg); }
         to { transform: rotate(360deg); }
+      }
+      @keyframes fall-emoji {
+        to { transform: translateY(110vh); opacity: 0; }
       }
     `;
     document.head.appendChild(style);
