@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
@@ -15,6 +15,7 @@
       overflow: hidden;
     }
 
+    /* 全螢幕容器 */
     .container {
       position: relative;
       height: 100vh;
@@ -26,15 +27,25 @@
 
     /* 縮放文字動畫 */
     .message {
-      font-size: 3em;
+      font-size: 2.5em;
+      font-weight: bold; /* ✅ 粗體 */
+      color: #4b0082;
+      opacity: 0;
+      transform: scale(0.5);
+      animation: zoomIn 1s forwards;
+      white-space: pre-line;
+    }
+
+    /* 倒數 321 特大字 */
+    .countdown {
+      font-size: 6em;  /* ✅ 更大，幾乎滿版 */
+      font-weight: bold;
       color: #4b0082;
       opacity: 0;
       transform: scale(0.5);
       animation: zoomIn 1s forwards;
     }
-    .message.countdown {
-      font-size: 4em; /* 倒數更大 */
-    }
+
     @keyframes zoomIn {
       to {
         opacity: 1;
@@ -46,17 +57,13 @@
     .cake {
       max-width: 80%;
       display: none;
-      opacity: 0;
-      transition: opacity 1s ease;
-    }
-    .cake.show {
-      display: block;
-      opacity: 1;
+      margin-top: 20px;
     }
 
     /* 生日快樂文字 */
     .celebrate-text {
-      font-size: 3em;
+      font-size: 3em;   /* ✅ 比普通訊息大一點 */
+      font-weight: bold;
       color: #4b0082;
       margin-top: 20px;
       opacity: 0;
@@ -71,9 +78,20 @@
       justify-content: center;
       gap: 20px;
     }
-    button {
+    #likeBtn {
       padding: 12px 25px;
       font-size: 1.2em;
+      background: #ffb347; /* ✅ 溫和橘色 */
+      color: white;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    #dislikeBtn {
+      padding: 12px 25px;
+      font-size: 1.2em;
+      background: #87ceeb; /* ✅ 溫和藍色 */
       color: white;
       border: none;
       border-radius: 15px;
@@ -82,12 +100,6 @@
     }
     button:hover {
       transform: scale(1.1);
-    }
-    #likeBtn {
-      background: #ffb84d; /* 溫和橘色 */
-    }
-    #dislikeBtn {
-      background: #4da6ff; /* 溫和藍色 */
     }
 
     /* 彩屑效果 */
@@ -141,7 +153,7 @@
   <div class="container" id="main-container">
     <div id="text-container"></div>
 
-    <video id="cakeVideo" class="cake" muted playsinline>
+    <video id="cakeVideo" class="cake" autoplay muted playsinline>
       <source src="Cake1.webm" type="video/webm">
     </video>
     <img id="cakeGif" class="cake" src="Cake2.gif" alt="Cake">
@@ -155,10 +167,9 @@
     </div>
   </div>
 
-  <!-- 提示框 -->
   <div id="dislikeModal" class="modal">
     <div class="modal-content">
-      <p id="dislikeMessage">你忍心嗎？🥺</p>
+      <p>沒有其他話了🥹<br>不要再給我點不喜歡了</p>
       <button onclick="closeDislikeModal()">關閉</button>
     </div>
   </div>
@@ -166,7 +177,7 @@
   <audio id="bgm" src="blessing.mp3" loop></audio>
 
   <script>
-    // ✅ 進入頁面自動播放背景音樂
+    // ✅ 進入頁面自動播放背景音樂（第一頁已互動過）
     window.addEventListener("load", () => {
       const bgm = document.getElementById("bgm");
       if (localStorage.getItem("bgmAllowed") === "true") {
@@ -196,9 +207,10 @@
       function showNext() {
         if (i < messages.length) {
           const msg = document.createElement("div");
-          msg.className = "message";
           if (["3","2","1"].includes(messages[i])) {
-            msg.classList.add("countdown");
+            msg.className = "countdown"; // ✅ 特大字樣式
+          } else {
+            msg.className = "message";
           }
           msg.textContent = messages[i];
           container.innerHTML = "";
@@ -212,23 +224,17 @@
       showNext();
     }
 
-    // 蛋糕切換效果
     function showCake() {
       const container = document.getElementById("text-container");
       container.innerHTML = "";
       const cakeVideo = document.getElementById("cakeVideo");
-      const cakeGif = document.getElementById("cakeGif");
-
-      cakeVideo.classList.add("show");
+      cakeVideo.style.display = "block";
       cakeVideo.play();
 
       cakeVideo.onended = () => {
-        cakeVideo.classList.remove("show"); // 淡出影片
-        setTimeout(() => {
-          cakeVideo.style.display = "none";
-          cakeGif.classList.add("show"); // 淡入 GIF
-          document.getElementById("celebrate").style.display = "block";
-        }, 1000);
+        cakeVideo.style.display = "none";
+        document.getElementById("cakeGif").style.display = "block";
+        document.getElementById("celebrate").style.display = "block";
       };
     }
 
@@ -247,82 +253,22 @@
         confetti.style.animationDuration = `${Math.random() * 3 + 2}s`;
 
         setTimeout(() => confetti.remove(), 5000);
-      }, 150);
+      }, 200);
     }
 
-    // ❌ 我不喜歡按鈕互動
-    let dislikeClickCount = 0;
-    const dislikeBtn = document.getElementById("dislikeBtn");
-    const likeBtn = document.getElementById("likeBtn");
-    const dislikeModal = document.getElementById("dislikeModal");
-    const dislikeMessage = document.getElementById("dislikeMessage");
-
-    dislikeBtn.addEventListener("click", () => {
-      dislikeClickCount++;
-
-      if (dislikeClickCount === 1) {
-        showEmoji("🥺");
-      } else if (dislikeClickCount === 2) {
-        dropEmojis("🥹");
-      } else {
-        showDislikeModal();
+    // ❌ 不喜歡按鈕 → 三次後跳提示框
+    let dislikeCount = 0;
+    document.getElementById("dislikeBtn").addEventListener("click", () => {
+      dislikeCount++;
+      if (dislikeCount >= 3) {
+        document.getElementById("dislikeModal").style.display = "flex";
+        dislikeCount = 0; // 重置
       }
     });
-
-    function showEmoji(emoji) {
-      const cakeGif = document.getElementById("cakeGif");
-      const emojiDiv = document.createElement("div");
-      emojiDiv.textContent = emoji;
-      emojiDiv.style.position = "absolute";
-      emojiDiv.style.top = cakeGif.offsetTop + "px";
-      emojiDiv.style.left = "50%";
-      emojiDiv.style.transform = "translateX(-50%)";
-      emojiDiv.style.fontSize = "4em";
-      emojiDiv.id = "emojiOverlay";
-      document.body.appendChild(emojiDiv);
-    }
-
-    function dropEmojis(emoji) {
-      for (let i = 0; i < 20; i++) {
-        const e = document.createElement("div");
-        e.textContent = emoji;
-        e.style.position = "absolute";
-        e.style.left = Math.random() * 100 + "vw";
-        e.style.top = "-50px";
-        e.style.fontSize = "2em";
-        e.style.animation = `fall ${Math.random() * 3 + 2}s linear forwards`;
-        document.body.appendChild(e);
-        setTimeout(() => e.remove(), 5000);
-      }
-    }
-
-    function showDislikeModal() {
-      const messages = [
-        "你忍心嗎？🥺",
-        "不要開玩笑啦…🥺",
-        "你再點我都快碎掉了🥹",
-        "好了，已經傷心了\n沒有其他話了🥹\n不要再給我點不喜歡了\n後面還有東西"
-      ];
-      let msgIndex = Math.min(dislikeClickCount - 3, messages.length - 1);
-      dislikeMessage.textContent = messages[msgIndex];
-      dislikeModal.style.display = "flex";
-
-      // 移除第一次顯示的 🥺
-      const emojiOverlay = document.getElementById("emojiOverlay");
-      if (emojiOverlay) emojiOverlay.remove();
-    }
 
     function closeDislikeModal() {
-      dislikeModal.style.display = "none";
+      document.getElementById("dislikeModal").style.display = "none";
     }
-
-    // ✅ 我很喜歡按鈕互動
-    likeBtn.addEventListener("click", () => {
-      document.getElementById("main-container").innerHTML = `
-        <h1 style="color:#4b0082;">💖 後續內容製作區塊 💖</h1>
-        <p style="color:#4b0082;">（這裡之後可以加新的驚喜內容）</p>
-      `;
-    });
   </script>
 </body>
 </html>
