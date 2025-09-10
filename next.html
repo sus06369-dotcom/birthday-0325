@@ -1,18 +1,17 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
+ <!DOCTYPE html>
+<html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Happy Birthday</title>
+  <title>Birthday Surprise</title>
   <style>
     body {
       margin: 0;
       padding: 0;
-      height: 100vh;
-      overflow: hidden;
-      text-align: center;
       font-family: "Noto Sans TC", sans-serif;
-      background: linear-gradient(to right, #d8b4fe, #fbc2eb); /* 紫粉漸層 */
+      text-align: center;
+      background: linear-gradient(to right, #d8b4fe, #fbc2eb);
+      overflow: hidden;
       color: white;
     }
 
@@ -23,78 +22,84 @@
       width: 100%;
       height: 100%;
       pointer-events: none;
+      z-index: 0;
     }
 
-    /* 🎂 蛋糕 */
+    .fullscreen-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.5);
+      font-size: 3em;
+      font-weight: bold;
+      opacity: 0;
+      white-space: nowrap;
+      transition: transform 1s ease, opacity 1s ease;
+      z-index: 2;
+    }
+
     #cake1, #cake2 {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%) scale(0.8);
-      max-width: 40%;
-      opacity: 0;
-      transition: opacity 1s ease; /* 加入淡入淡出 */
+      max-width: 50%;
+      display: none;
+      z-index: 1;
     }
 
-    #cake1 {
-      opacity: 1; /* 影片先顯示 */
-    }
-
-    #cake2 {
-      opacity: 0; /* GIF 先隱藏（透明） */
-    }
-
-    /* 🎉 文字訊息 */
     #message {
       position: absolute;
       top: 75%;
       left: 50%;
       transform: translateX(-50%) scale(0.5);
-      font-size: 3.5em; /* 比之前更大 */
+      font-size: 3em;
+      font-weight: bold;
       opacity: 0;
       transition: transform 1s ease, opacity 1s ease;
       white-space: nowrap;
+      z-index: 2;
     }
 
-    /* 👍👎 按鈕 */
     #buttons {
       position: absolute;
-      top: 83%;
+      top: 85%;
       left: 50%;
       transform: translateX(-50%);
       display: none;
-      gap: 20px;
+      gap: 40px;
+      z-index: 2;
     }
 
     button {
-      padding: 12px 24px;
-      font-size: 1.2em;
+      padding: 12px 28px;
+      font-size: 1.3em;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer;
       transition: transform 0.3s ease, background 0.3s ease;
     }
 
     #likeBtn {
-      background: #ffa500; /* 溫和橘色 */
+      background: #ffb347; /* 溫和橘色 */
       color: white;
     }
 
     #dislikeBtn {
-      background: #4da6ff; /* 溫和藍色 */
+      background: #6ca0dc; /* 溫和藍色 */
       color: white;
     }
 
-    /* 😭 提示與表情 */
     #overlayEmoji {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%) scale(0);
-      font-size: 8em;
+      font-size: 6em;
       opacity: 0;
       transition: transform 0.5s ease, opacity 0.5s ease;
       pointer-events: none;
+      z-index: 3;
     }
 
     .falling-emoji {
@@ -103,6 +108,7 @@
       font-size: 2em;
       pointer-events: none;
       animation: fall linear forwards;
+      z-index: 3;
     }
 
     @keyframes fall {
@@ -121,6 +127,7 @@
       background: rgba(0,0,0,0.5);
       justify-content: center;
       align-items: center;
+      z-index: 5;
     }
 
     .modal-content {
@@ -142,16 +149,29 @@
       color: white;
       cursor: pointer;
     }
+
+    /* 🔹 保留未來擴充內容的區塊 */
+    #extra-content {
+      position: relative;
+      z-index: 4;
+    }
   </style>
 </head>
 <body>
+  <!-- 🎶 背景音樂 -->
+  <audio id="bgm" src="blessing.mp3" autoplay loop></audio>
+
+  <!-- 🎉 彩屑 -->
   <canvas id="confetti"></canvas>
 
+  <!-- 📖 全螢幕逐字顯示 -->
+  <div id="text-container"></div>
+
   <!-- 🎂 蛋糕 -->
-  <video id="cake1" src="Cake1.webm" autoplay></video>
+  <video id="cake1" src="Cake1.webm"></video>
   <img id="cake2" src="Cake2.gif" alt="Cake">
 
-  <!-- 🎉 文字 -->
+  <!-- 🎊 祝賀文字 -->
   <div id="message">お誕生日おめでとう</div>
 
   <!-- 👍👎 按鈕 -->
@@ -160,30 +180,22 @@
     <button id="dislikeBtn">我不喜歡</button>
   </div>
 
-  <!-- 😭 表情 -->
+  <!-- 🥺 表情 -->
   <div id="overlayEmoji">🥺</div>
 
-  <!-- 彈出提示框 -->
-  <div id="dislikeModal" class="modal">
+  <!-- ❗ 提示框 -->
+  <div id="modal" class="modal">
     <div class="modal-content">
       <p id="modalText"></p>
-      <button onclick="closeDislikeModal()">關閉</button>
+      <button onclick="closeModal()">關閉</button>
     </div>
   </div>
 
-  <!-- 🎵 背景音樂 -->
-  <audio id="bgm" src="blessing.mp3" loop></audio>
+  <!-- 🔹 保留擴充內容 -->
+  <div id="extra-content"></div>
 
   <script>
-    // 🎵 背景音樂（從第一頁帶過來）
-    const bgm = document.getElementById("bgm");
-    if (localStorage.getItem("bgmAllowed") === "true") {
-      bgm.play().catch(() => {
-        console.log("自動播放失敗，等待用戶互動");
-      });
-    }
-
-    // 🎉 彩屑效果
+    // ✅ 彩屑效果
     const canvas = document.getElementById("confetti");
     const ctx = canvas.getContext("2d");
     let W = window.innerWidth;
@@ -225,7 +237,6 @@
         c.y += (Math.cos(c.d) + 3 + c.r / 2) / 2;
         c.x += Math.sin(0.5);
         c.tilt = Math.sin(c.tiltAngle - i / 3) * 15;
-
         if (c.y > H) {
           confetti[i] = {
             x: Math.random() * W,
@@ -246,26 +257,121 @@
       drawConfetti();
     })();
 
-    // 🎂 蛋糕切換：避免閃爍
+    // ✅ 逐字顯示 + 倒數
+    const textContainer = document.getElementById("text-container");
+    const texts = [
+      "嘿～芝茉妲絲",
+      "今天是屬於",
+      "🫵🏻🫵🏻你🫵🏻🫵🏻",
+      "特別日子！！！",
+      "準備好了嗎？",
+      "就算還沒",
+      "也給我準備好",
+      "不等你的",
+      "3",
+      "2",
+      "1",
+    ];
+
+    function showText(index) {
+      if (index >= texts.length) {
+        startCake();
+        return;
+      }
+      const div = document.createElement("div");
+      div.className = "fullscreen-text";
+      div.textContent = texts[index];
+      textContainer.innerHTML = "";
+      textContainer.appendChild(div);
+
+      setTimeout(() => {
+        div.style.opacity = 1;
+        div.style.transform = "translate(-50%, -50%) scale(1)";
+      }, 100);
+
+      setTimeout(() => {
+        div.style.opacity = 0;
+        div.style.transform = "translate(-50%, -50%) scale(1.5)";
+        setTimeout(() => showText(index + 1), 1000);
+      }, 1800);
+    }
+    showText(0);
+
+    // ✅ 蛋糕播放
     const cake1 = document.getElementById("cake1");
     const cake2 = document.getElementById("cake2");
-
-    cake1.addEventListener("ended", () => {
-      cake1.style.opacity = 0;
-      cake2.style.opacity = 1;
-    });
-
-    // 🎉 顯示文字與按鈕
     const message = document.getElementById("message");
     const buttons = document.getElementById("buttons");
+    const overlayEmoji = document.getElementById("overlayEmoji");
+    const modal = document.getElementById("modal");
+    const modalText = document.getElementById("modalText");
 
-    setTimeout(() => {
-      message.style.opacity = 1;
-      message.style.transform = "translateX(-50%) scale(1)";
+    function startCake() {
+      cake1.style.display = "block";
+      cake1.play();
+
+      cake1.addEventListener("ended", () => {
+        cake1.style.display = "none";
+        cake2.style.display = "block";
+      });
+
       setTimeout(() => {
-        buttons.style.display = "flex";
-      }, 1500);
-    }, 15000);
+        message.style.opacity = 1;
+        message.style.transform = "translateX(-50%) scale(1)";
+        setTimeout(() => {
+          buttons.style.display = "flex";
+        }, 1500);
+      }, 3000);
+    }
+
+    // ✅ 按鈕互動
+    let dislikeCount = 0;
+
+    document.getElementById("dislikeBtn").addEventListener("click", () => {
+      dislikeCount++;
+      if (dislikeCount === 1) {
+        overlayEmoji.textContent = "🥺";
+        overlayEmoji.style.opacity = 1;
+        overlayEmoji.style.transform = "translate(-50%, -50%) scale(1)";
+      } else if (dislikeCount === 2) {
+        for (let i = 0; i < 30; i++) {
+          const emoji = document.createElement("div");
+          emoji.textContent = "🥹";
+          emoji.className = "falling-emoji";
+          emoji.style.left = Math.random() * 100 + "vw";
+          emoji.style.animationDuration = 2 + Math.random() * 3 + "s";
+          document.body.appendChild(emoji);
+          setTimeout(() => emoji.remove(), 5000);
+        }
+      } else if (dislikeCount >= 3) {
+        overlayEmoji.style.opacity = 0;
+        let modalMessages = [
+          "你忍心嗎？🥺",
+          "不要開玩笑啦…🥺",
+          "你再點我都快碎掉了🥹",
+          "好了，已經傷心了\n沒有其他話了🥹\n不要再給我點不喜歡了\n後面還有東西",
+        ];
+        let msgIndex = Math.min(dislikeCount - 3, modalMessages.length - 1);
+        modalText.innerText = modalMessages[msgIndex];
+        modal.style.display = "flex";
+      }
+    });
+
+    function closeModal() {
+      modal.style.display = "none";
+    }
+
+    document.getElementById("likeBtn").addEventListener("click", () => {
+      textContainer.innerHTML = "";
+      cake1.style.display = "none";
+      cake2.style.display = "none";
+      message.style.display = "none";
+      buttons.style.display = "none";
+      overlayEmoji.style.display = "none";
+
+      // 🔹 之後的內容就可以放進 extra-content 裡
+      document.getElementById("extra-content").innerHTML = "<h1>💖 後續內容在這裡 💖</h1>";
+    });
   </script>
 </body>
 </html>
