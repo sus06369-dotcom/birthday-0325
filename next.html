@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Surprise 🎉</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@700&display=swap" rel="stylesheet">
-
   <style>
     body {
       margin: 0;
@@ -15,7 +14,6 @@
       overflow: hidden;
     }
 
-    /* 全螢幕容器 */
     .container {
       position: relative;
       height: 100vh;
@@ -25,23 +23,26 @@
       flex-direction: column;
     }
 
-    /* 縮放文字動畫 */
+    /* 一般文字動畫 */
     .message {
-      font-size: 2.8em;
+      font-size: 2.5em;
       font-weight: bold;
       color: #4b0082;
       opacity: 0;
       transform: scale(0.5);
       animation: zoomIn 1s forwards;
     }
+
+    /* 倒數字體更大 */
     .countdown {
-      font-size: 5em; /* 倒數更大 */
+      font-size: 6em;
       font-weight: bold;
       color: #4b0082;
       opacity: 0;
       transform: scale(0.5);
       animation: zoomIn 1s forwards;
     }
+
     @keyframes zoomIn {
       to {
         opacity: 1;
@@ -50,22 +51,22 @@
     }
 
     /* 蛋糕影片 / GIF */
-    .cake-container {
-      position: relative;
-      width: 100%;
-      height: 60vh; /* 蛋糕區塊靠上 */
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-    }
     .cake {
-      max-width: 70%;
-      position: absolute;
-      top: 0;
+      max-width: 60%;
       display: none;
+      margin: 0 auto;
     }
 
-    /* 祝賀文字 */
+    /* 蛋糕區塊：置中但靠上 */
+    #cake-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      margin-top: 5vh; /* 上半部位置 */
+    }
+
+    /* 生日文字 */
     .celebrate-text {
       font-size: 3em;
       font-weight: bold;
@@ -76,38 +77,56 @@
       animation: zoomIn 1s forwards;
     }
 
-    /* 按鈕樣式 */
+    /* 按鈕 */
     .buttons {
       margin-top: 25px;
       display: flex;
       justify-content: center;
       gap: 20px;
     }
-    #likeBtn {
+    button {
       padding: 12px 25px;
       font-size: 1.2em;
-      background: #ffb347; /* 溫和橘色 */
-      color: white;
       border: none;
       border-radius: 15px;
       cursor: pointer;
-      transition: transform 0.2s, opacity 0.5s;
+      transition: transform 0.2s;
+      font-weight: bold;
+    }
+    #likeBtn {
+      background: #f4a261; /* 溫和橘色 */
+      color: white;
     }
     #dislikeBtn {
-      padding: 12px 25px;
-      font-size: 1.2em;
-      background: #6ec6ff; /* 溫和藍色 */
+      background: #6ca0dc; /* 溫和藍色 */
       color: white;
-      border: none;
-      border-radius: 15px;
-      cursor: pointer;
-      transition: transform 0.2s, opacity 0.5s;
     }
     button:hover {
       transform: scale(1.1);
     }
 
-    /* 彩屑效果 */
+    /* 提示框 */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: white;
+      padding: 20px 30px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 1.2em;
+      color: #4b0082;
+      font-weight: bold;
+      box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
+    }
+
+    /* 彩屑 */
     .confetti {
       position: absolute;
       width: 10px;
@@ -129,8 +148,7 @@
   <div class="container" id="main-container">
     <div id="text-container"></div>
 
-    <!-- 蛋糕區塊 -->
-    <div class="cake-container">
+    <div id="cake-wrapper">
       <video id="cakeVideo" class="cake" autoplay muted playsinline>
         <source src="Cake1.webm" type="video/webm">
       </video>
@@ -146,10 +164,17 @@
     </div>
   </div>
 
+  <!-- 提示框 -->
+  <div id="errorModal" class="modal">
+    <div class="modal-content">
+      <p>沒有其他話了🥹</p>
+      <p>不要再給我點不喜歡了</p>
+    </div>
+  </div>
+
   <audio id="bgm" src="blessing.mp3" loop></audio>
 
   <script>
-    // ✅ 進入頁面自動播放背景音樂
     window.addEventListener("load", () => {
       const bgm = document.getElementById("bgm");
       if (localStorage.getItem("bgmAllowed") === "true") {
@@ -168,7 +193,7 @@
       "準備好了嗎？🧐",
       "就算還沒👀",
       "也給我準備好😎",
-      "不等你的🥳",
+      "不等你了🥳",
       "3", "2", "1"
     ];
 
@@ -180,8 +205,8 @@
         if (i < messages.length) {
           const msg = document.createElement("div");
           msg.className = (messages[i] === "3" || messages[i] === "2" || messages[i] === "1") 
-            ? "countdown" 
-            : "message";
+                          ? "countdown" 
+                          : "message";
           msg.textContent = messages[i];
           container.innerHTML = "";
           container.appendChild(msg);
@@ -198,19 +223,17 @@
       const container = document.getElementById("text-container");
       container.innerHTML = "";
       const cakeVideo = document.getElementById("cakeVideo");
-      const cakeGif = document.getElementById("cakeGif");
-
-      cakeGif.style.display = "block"; // 先放 GIF 在下面
-      cakeVideo.style.display = "block"; // 播放影片覆蓋上去
+      cakeVideo.style.display = "block";
       cakeVideo.play();
 
       cakeVideo.onended = () => {
-        cakeVideo.style.display = "none"; // 移除影片 → GIF 無縫呈現
+        cakeVideo.style.display = "none";
+        document.getElementById("cakeGif").style.display = "block";
         document.getElementById("celebrate").style.display = "block";
       };
     }
 
-    // 🎉 彩屑效果
+    // 彩屑
     function launchConfetti() {
       setInterval(() => {
         const confetti = document.createElement("div");
@@ -227,6 +250,19 @@
         setTimeout(() => confetti.remove(), 5000);
       }, 200);
     }
+
+    // 按鈕互動
+    let dislikeCount = 0;
+    document.getElementById("dislikeBtn").addEventListener("click", () => {
+      dislikeCount++;
+      if (dislikeCount === 1) {
+        alert("🥺");
+      } else if (dislikeCount === 2) {
+        alert("🥹");
+      } else {
+        document.getElementById("errorModal").style.display = "flex";
+      }
+    });
   </script>
 </body>
 </html>
